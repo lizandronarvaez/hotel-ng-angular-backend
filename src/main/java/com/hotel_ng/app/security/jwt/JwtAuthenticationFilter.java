@@ -36,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/admin/auth",
             "/api/v1/rooms/get-all-rooms",
             "/api/v1/rooms/get-types-rooms",
+            "/api/v1/rooms/all-available-rooms",
             "/api/v1/rooms/available-rooms-by-date-and-type",
             "/api/v1/bookings/get-by-booking-code");
 
