@@ -15,11 +15,6 @@
     "description": "A description for 'cloudinary.api_secret'"
   },
   {
-    "name": "secret.authorizacion-admin",
-    "type": "java.lang.String",
-    "description": "A description for 'secret.authorizacion-admin'"
-  },
-  {
     "name": "secret.authorizationAdmin",
     "type": "java.lang.String",
     "description": "A description for 'secret.authorizationAdmin'"
