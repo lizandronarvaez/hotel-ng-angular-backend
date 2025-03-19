@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "cloudinary.cloud_name",
+    "type": "java.lang.String",
+    "description": "A description for 'cloudinary.cloud_name'"
+  },
+  {
+    "name": "cloudinary.api_key",
+    "type": "java.lang.String",
+    "description": "A description for 'cloudinary.api_key'"
+  },
+  {
+    "name": "cloudinary.api_secret",
+    "type": "java.lang.String",
+    "description": "A description for 'cloudinary.api_secret'"
+  },
+  {
+    "name": "secret.authorizacion-admin",
+    "type": "java.lang.String",
+    "description": "A description for 'secret.authorizacion-admin'"
+  },
+  {
+    "name": "secret.authorizationAdmin",
+    "type": "java.lang.String",
+    "description": "A description for 'secret.authorizationAdmin'"
+  }
+]}
