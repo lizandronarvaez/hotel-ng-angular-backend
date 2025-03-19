@@ -26,7 +26,7 @@ public class AdminServiceImpl implements AdminService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${secret.authorization-admin}")
+    @Value("${secret.authorizationAdmin}")
     private String codeAuthorization;
 
     @Override
