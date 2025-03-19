@@ -43,6 +43,7 @@ public class JwtUtils {
 
     public static String extractRoleToken(String token) {
         Claims claims = getTokenBody(token);
+        @SuppressWarnings("unchecked")
         List<String> authorities = claims.get("authorities", List.class);
     
         if (authorities != null && !authorities.isEmpty()) {
