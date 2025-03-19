@@ -71,6 +71,7 @@ public class SecurityConfig {
 
                         // todo:habitaciones
                         .requestMatchers(HttpMethod.GET, "/rooms/get-all-rooms").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/rooms/all-available-rooms").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rooms/get-types-rooms").permitAll()
                         .requestMatchers(HttpMethod.GET, "/rooms/available-rooms-by-date-and-type").permitAll()
                         .requestMatchers(
