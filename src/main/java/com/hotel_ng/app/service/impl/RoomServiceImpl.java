@@ -38,22 +38,15 @@ public class RoomServiceImpl implements RoomService {
         ResponseDto responseDto = new ResponseDto();
         List<ServiceRooms> services = findOrCreateServices(roomType);
         String imageUrl = null;
-        Room room;
 
         try {
-            if (roomImage != null) {
+            if (roomImage != null)
                 imageUrl = cloudDinaryService.uploadImage(roomImage, "rooms");
-            }
-            room = new Room();
-            room.setRoomImageUrl(imageUrl);
-            room.setRoomType(roomType);
-            room.setRoomPrice(roomPrice);
-            room.setRoomDescription(description);
-            room.setRoomMaxOfGuest(Integer.parseInt(roomMaxOfGuest));
-            room.setServices(services);
 
-            Room savedRoom = roomRepository.save(room);
-            RoomDto roomDto = Utils.mapRoomEntityToRoomDto(savedRoom);
+            Room room = Utils.mapRoomDtoToRoomEntity(roomImage, roomType, roomPrice, description, roomMaxOfGuest,
+                    services, imageUrl);
+            roomRepository.save(room);
+            RoomDto roomDto = Utils.mapRoomEntityToRoomDto(room);
 
             responseDto.setRoom(roomDto);
             responseDto.setMessage("Operación exitosa");
