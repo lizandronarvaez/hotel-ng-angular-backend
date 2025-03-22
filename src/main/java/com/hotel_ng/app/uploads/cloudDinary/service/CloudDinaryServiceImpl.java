@@ -2,64 +2,35 @@ package com.hotel_ng.app.uploads.cloudDinary.service;
 
 import java.io.IOException;
 import java.util.*;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 @RequiredArgsConstructor
 @Service
 public class CloudDinaryServiceImpl implements CloudDinaryService {
 
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
-    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpeg", "jpg", "png", "webp");
+    private static final List<String> EXTENSION_IMAGE_VALID = Arrays.asList("jpeg", "jpg", "png", "webp");
 
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadImage(MultipartFile file, String nameFolder) {
-        try {
-            String[] originalFileName = getFileNameParts(file);
-            String extFile = originalFileName[1];
+    public String uploadImage(MultipartFile file, String nameFolder) throws IOException {
 
-            verifyFileSize(file);
-            verifyFileFormat(extFile);
-
-            HashMap<Object, Object> options = new HashMap<>();
-            options.put("folder", nameFolder);
-            @SuppressWarnings("rawtypes")
-            Map uploadedFile = cloudinary.uploader().upload(file.getBytes(), options);
-
-            return (String) uploadedFile.get("secure_url");
-        } catch (IOException e) {
-            return ("Error al cargar el archivo: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public String[] getFileNameParts(MultipartFile file) {
-        return file.getOriginalFilename().split("\\.");
-    }
-
-    @Override
-    public void verifyFileSize(MultipartFile file) {
-        long fileSize = file.getSize();
-        if (fileSize > MAX_FILE_SIZE)
-            throw new MaxUploadSizeExceededException(MAX_FILE_SIZE);
+            @SuppressWarnings("null")
+            String extImage = file.getOriginalFilename().split("\\.")[1];
+            verifyFileFormat(extImage);
+            var uploadedFile = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", nameFolder));
+            return cloudinary.url().secure(true).generate((String) uploadedFile.get("public_id"));
     }
 
     @Override
     public void verifyFileFormat(String extFile) {
-        if (!ALLOWED_EXTENSIONS.contains(extFile.toLowerCase()))
+        if (!EXTENSION_IMAGE_VALID.contains(extFile.toLowerCase()))
             throw new MultipartException("¡El formato de archivo no es válido!");
-    }
-
-    @Override
-    public String generateNewFileName(String nameFile, String extFile) {
-        return nameFile + UUID.randomUUID() + "." + extFile;
     }
 
 }
