@@ -1,11 +1,15 @@
 package com.hotel_ng.app.utils;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.hotel_ng.app.dto.*;
 import com.hotel_ng.app.entity.*;
+import com.hotel_ng.app.enums.RoomType;
 
 public class Utils {
 
@@ -42,22 +46,29 @@ public class Utils {
                 .build();
     }
 
-    public static RoomDto mapRoomEntityToRoomDto(Room room) {
-        RoomDto roomDto = new RoomDto();
-        roomDto.setId(room.getId());
-        roomDto.setRoomType(room.getRoomType().name());
-        roomDto.setRoomPrice(room.getRoomPrice());
-        roomDto.setRoomImageUrl(room.getRoomImageUrl());
-        roomDto.setRoomDescription(room.getRoomDescription());
-        roomDto.setRoomMaxOfGuest(room.getRoomMaxOfGuest());
+    public static Room mapRoomDtoToRoomEntity(MultipartFile roomImage, RoomType roomType, BigDecimal roomPrice,
+            String description,
+            String roomMaxOfGuest, List<ServiceRooms> services, String imageUrl) {
+        return Room.builder()
+                .roomType(roomType)
+                .roomPrice(roomPrice)
+                .roomMaxOfGuest(Integer.parseInt(roomMaxOfGuest))
+                .roomDescription(description)
+                .services(services)
+                .roomImageUrl(imageUrl)
+                .build();
+    }
 
-        if (room.getServices() != null) {
-            List<ServiceRoomsDto> serviceRooms = room.getServices().stream()
-                    .map(service -> new ServiceRoomsDto(service.getId(), service.getName()))
-                    .collect(Collectors.toList());
-            roomDto.setServiceRooms(serviceRooms);
-        }
-        return roomDto;
+    public static RoomDto mapRoomEntityToRoomDto(Room room) {
+        return RoomDto.builder()
+                .id(room.getId())
+                .roomType(room.getRoomType().name())
+                .roomPrice(room.getRoomPrice())
+                .roomImageUrl(room.getRoomImageUrl())
+                .roomDescription(room.getRoomDescription())
+                .roomMaxOfGuest(room.getRoomMaxOfGuest())
+                .serviceRooms(room.getServices())
+                .build();
     }
 
     public static BookingDto mapBookingEntityToBookingDto(Booking booking) {
