@@ -93,7 +93,7 @@ public class RoomController {
     // obtener todas las habitaciones disponibles sin conocer las fechas
     @GetMapping("/all-available-rooms")
     public ResponseEntity<ResponseDto> getAvailableRooms() {
-        ResponseDto response = roomService.getAvaliableRooms();
+        ResponseDto response = roomService.getAvailableRooms();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -120,7 +120,7 @@ public class RoomController {
 
         // convierte el string a valore roomType
         RoomType roomTypeEnum = RoomType.valueOf(roomType.toUpperCase());
-        ResponseDto response = roomService.getAvaliaRoomsByDateAndType(checkInDate, checkOutDate, roomTypeEnum);
+        ResponseDto response = roomService.getAvailableRoomsByDateAndType(checkInDate, checkOutDate, roomTypeEnum);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
