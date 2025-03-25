@@ -1,5 +1,6 @@
 package com.hotel_ng.app.service.impl;
 
+import com.hotel_ng.app.mappers.AdminMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,9 +15,9 @@ import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.repository.AdminRepository;
 import com.hotel_ng.app.security.utils.JwtUtils;
 import com.hotel_ng.app.service.interfaces.AdminService;
-import com.hotel_ng.app.utils.Utils;
 
 import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @Service
@@ -25,6 +26,7 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
+    private final AdminMapper adminMapper;
 
     @Value("${secret.authorizationAdmin}")
     private String codeAuthorization;
@@ -50,7 +52,7 @@ public class AdminServiceImpl implements AdminService {
                     .build();
 
             Admin adminSaved = adminRepository.save(admin);
-            AdminDto adminDto = Utils.mapAdminEntityToAdminDto(adminSaved);
+            AdminDto adminDto =adminMapper.mapAdminEntityToAdminDto(adminSaved);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Cuenta administrador creada correctamente");
@@ -86,7 +88,7 @@ public class AdminServiceImpl implements AdminService {
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Haz accedido como administrador");
-            responseDto.setAdmin(Utils.mapAdminEntityToAdminDto(admin));
+            responseDto.setAdmin(adminMapper.mapAdminEntityToAdminDto(admin));
             responseDto.setToken(token);
             responseDto.setRole(admin.getRole().name());
 
