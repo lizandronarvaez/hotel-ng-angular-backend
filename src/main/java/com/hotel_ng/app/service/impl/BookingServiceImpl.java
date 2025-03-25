@@ -3,6 +3,7 @@ package com.hotel_ng.app.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel_ng.app.mappers.BookingMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final BookingMapper bookingMapper;
 
     @Override
     public ResponseDto saveBooking(Long roomId, Long userId, Booking bookingRequest) {
@@ -77,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
             Booking booking = bookingRepository.findByConfirmationCode(confirmationCode)
                     .orElseThrow(() -> new OurException("Número de reserva no válido"));
 
-            BookingDto bookingDto = Utils.mapBookingEntityToBookingDtoWithRoom(booking, true);
+            BookingDto bookingDto = bookingMapper.mapBookingEntityToBookingDtoWithRoom(booking, true);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
@@ -97,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
         ResponseDto responseDto = new ResponseDto();
         try {
             List<Booking> bookings = bookingRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-            List<BookingDto> listBookingDtos = Utils.mapBookingListEntityToBookingDtoList(bookings);
+            List<BookingDto> listBookingDtos = bookingMapper.mapBookingListEntityToBookingDtoList(bookings);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
