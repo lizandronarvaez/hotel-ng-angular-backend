@@ -26,7 +26,7 @@ public interface RoomService {
 
     ResponseDto getRoomById(Long roomId);
 
-    ResponseDto getAvaliaRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
+    ResponseDto getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
 
-    ResponseDto getAvaliableRooms();
+    ResponseDto getAvailableRooms();
 }
