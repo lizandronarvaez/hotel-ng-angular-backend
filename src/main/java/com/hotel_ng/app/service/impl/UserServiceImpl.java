@@ -2,6 +2,8 @@ package com.hotel_ng.app.service.impl;
 
 import java.util.List;
 
+import com.hotel_ng.app.mappers.BookingMapper;
+import com.hotel_ng.app.mappers.UserMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,7 +17,6 @@ import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.repository.UserRepository;
 import com.hotel_ng.app.security.utils.JwtUtils;
 import com.hotel_ng.app.service.interfaces.UserService;
-import com.hotel_ng.app.utils.Utils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +28,8 @@ public class UserServiceImpl implements UserService {
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final BookingMapper bookingMapper;
 
     @Override
     public ResponseDto register(RegisterUserDto loginUserDto) {
@@ -45,7 +48,7 @@ public class UserServiceImpl implements UserService {
                     .role(UserRole.ROLE_USER)
                     .build();
             Client userSaved = userRepository.save(user);
-            UserDto userDto = Utils.mapUserEntityToUserDto(userSaved);
+            UserDto userDto = this.userMapper.mapUserEntityToUserDto(userSaved);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Usuario registrado con éxito");
@@ -78,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Usuario logueado con éxito");
-            responseDto.setUser(Utils.mapUserEntityToUserDto(user));
+            responseDto.setUser(this.userMapper.mapUserEntityToUserDto(user));
             responseDto.setToken(token);
             responseDto.setRole(user.getRole().name());
 
@@ -99,7 +102,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             List<Client> users = userRepository.findAll();
-            List<UserDto> userDtos = Utils.mapUserListEntityToUserDtoList(users);
+            List<UserDto> userDtos = this.userMapper.mapUserListEntityToUserDtoList(users);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Lista de usuarios");
@@ -120,7 +123,7 @@ public class UserServiceImpl implements UserService {
         try {
             Client user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = Utils.mapUserEntityToUserDtoWithBookingAndRoom(user);
+            UserDto userDto = this.userMapper.mapUserEntityToUserDtoWithBookingAndRoom(user,bookingMapper);
 
             responseDto.setMessage("¡Operación exitosa!");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -144,7 +147,7 @@ public class UserServiceImpl implements UserService {
         try {
             Client user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = Utils.mapUserEntityToUserDto(user);
+            UserDto userDto = this.userMapper.mapUserEntityToUserDto(user);
 
             responseDto.setMessage("Usuario encontrado");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -168,7 +171,7 @@ public class UserServiceImpl implements UserService {
         try {
             Client user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = Utils.mapUserEntityToUserDto(user);
+            UserDto userDto = this.userMapper.mapUserEntityToUserDto(user);
 
             responseDto.setMessage("Usuario encontrado");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -194,7 +197,7 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
             userRepository.deleteById(Long.valueOf(userId));
 
-            responseDto.setMessage("Operácion exitosa");
+            responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
 
         } catch (OurException e) {
