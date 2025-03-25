@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel_ng.app.mappers.RoomMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +21,6 @@ import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.repository.*;
 import com.hotel_ng.app.service.interfaces.RoomService;
 import com.hotel_ng.app.uploads.cloudDinary.service.CloudDinaryService;
-import com.hotel_ng.app.utils.Utils;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -31,10 +30,11 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final CloudDinaryService cloudDinaryService;
     private final RoomServiceRepository roomServiceRepository;
+    private final RoomMapper roomMapper;
 
     @Override
     public ResponseDto addNewRoom(MultipartFile roomImage, RoomType roomType, BigDecimal roomPrice, String description,
-            String roomMaxOfGuest) {
+                                  String roomMaxOfGuest) {
         ResponseDto responseDto = new ResponseDto();
         List<ServiceRooms> services = findOrCreateServices(roomType);
         String imageUrl = null;
@@ -43,10 +43,10 @@ public class RoomServiceImpl implements RoomService {
             if (roomImage != null)
                 imageUrl = cloudDinaryService.uploadImage(roomImage, "rooms");
 
-            Room room = Utils.mapRoomDtoToRoomEntity(roomImage, roomType, roomPrice, description, roomMaxOfGuest,
+            Room room = roomMapper.mapRoomDtoToRoomEntity(roomType, roomPrice, description, roomMaxOfGuest,
                     services, imageUrl);
             roomRepository.save(room);
-            RoomDto roomDto = Utils.mapRoomEntityToRoomDto(room);
+            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(room);
 
             responseDto.setRoom(roomDto);
             responseDto.setMessage("Operación exitosa");
@@ -74,7 +74,7 @@ public class RoomServiceImpl implements RoomService {
                     pageable.getPageSize(),
                     Sort.by(Sort.Direction.ASC, "id"));
             Page<Room> roomPage = roomRepository.findAll(sortedPageable);
-            List<RoomDto> roomDtos = Utils.mapRoomListEntityToRoomListDTO(roomPage.getContent());
+            List<RoomDto> roomDtos = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
 
             responseDto.setRoomList(roomDtos);
             responseDto.setMessage("Operación exitosa");
@@ -117,7 +117,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public ResponseDto updateRoom(Long roomId, MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice,
-            String description, String roomMaxOfGuest) {
+                                  String description, String roomMaxOfGuest) {
         ResponseDto responseDto = new ResponseDto();
 
         try {
@@ -137,7 +137,7 @@ public class RoomServiceImpl implements RoomService {
             roomUpdate.setRoomMaxOfGuest(Integer.parseInt(roomMaxOfGuest));
 
             Room savedRoom = roomRepository.save(roomUpdate);
-            RoomDto roomDto = Utils.mapRoomEntityToRoomDto(savedRoom);
+            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(savedRoom);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -157,7 +157,7 @@ public class RoomServiceImpl implements RoomService {
         try {
             Room room = roomRepository.findById(roomId)
                     .orElseThrow(() -> new OurException("No se encontró la habitación con el id: " + roomId));
-            RoomDto roomDto = Utils.mapRoomEntityToRoomDto(room);
+            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(room);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -175,13 +175,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getAvaliaRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType) {
+    public ResponseDto getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType) {
         ResponseDto responseDto = new ResponseDto();
 
         try {
             List<Room> availableRooms = roomRepository.findAvailableByDateAndTypes(checkInDate, checkOutDate,
                     roomType);
-            List<RoomDto> roomListDto = Utils.mapRoomListEntityToRoomListDTO(availableRooms);
+            List<RoomDto> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
@@ -199,12 +199,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getAvaliableRooms() {
+    public ResponseDto getAvailableRooms() {
         ResponseDto responseDto = new ResponseDto();
 
         try {
             List<Room> availableRooms = roomRepository.findAllAvailableRooms();
-            List<RoomDto> roomListDto = Utils.mapRoomListEntityToRoomListDTO(availableRooms);
+            List<RoomDto> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -218,12 +218,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private List<ServiceRooms> findOrCreateServices(RoomType roomType) {
-        // Obtener o crear los servicios del enum en la base de datos
-        return roomType.getServices().stream().map(serviceName -> {
-            return roomServiceRepository.findByName(serviceName).orElseGet(() -> {
-                ServiceRooms newService = ServiceRooms.builder().name(serviceName).build();
-                return roomServiceRepository.save(newService);
-            });
-        }).toList();
+        return roomType.getServices().stream().map(serviceName -> roomServiceRepository.findByName(serviceName).orElseGet(() -> {
+            ServiceRooms newService = ServiceRooms.builder().name(serviceName).build();
+            return roomServiceRepository.save(newService);
+        })).toList();
     }
 }
