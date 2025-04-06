@@ -40,10 +40,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+
+        <!--        manejo de email-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -118,6 +121,13 @@
             <version>5.2.0</version>
             <scope>test</scope>
         </dependency>
+        <!--        swagger documentation-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -152,8 +162,10 @@
                 <version>3.0.0-M7</version>
                 <configuration>
                     <argLine>
+                        -XX:+EnableDynamicAgentLoading
                         -XX:+IgnoreUnrecognizedVMOptions
                         -XX:-VerifySharedSpaces
+                        -Xshare:off
                         --add-opens=java.base/java.lang=ALL-UNNAMED
                         --add-opens=java.base/java.util=ALL-UNNAMED
                     </argLine>
