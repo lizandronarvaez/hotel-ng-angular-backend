@@ -1,4 +1,4 @@
-package com.hotel_ng.app.service.config;
+package com.hotel_ng.app.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
