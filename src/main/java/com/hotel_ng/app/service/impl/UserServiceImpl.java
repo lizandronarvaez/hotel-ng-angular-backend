@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hotel_ng.app.mappers.BookingMapper;
 import com.hotel_ng.app.mappers.UserMapper;
+import com.hotel_ng.app.service.interfaces.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final BookingMapper bookingMapper;
+    private final EmailService emailService;
 
     @Override
     public ResponseDto register(RegisterUserDto loginUserDto) {
@@ -123,7 +125,7 @@ public class UserServiceImpl implements UserService {
         try {
             Client user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = this.userMapper.mapUserEntityToUserDtoWithBookingAndRoom(user,bookingMapper);
+            UserDto userDto = this.userMapper.mapUserEntityToUserDtoWithBookingAndRoom(user, bookingMapper);
 
             responseDto.setMessage("¡Operación exitosa!");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -176,7 +178,7 @@ public class UserServiceImpl implements UserService {
             responseDto.setMessage("Usuario encontrado");
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setUser(userDto);
-            
+
         } catch (OurException e) {
             responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
             responseDto.setMessage(e.getMessage());
@@ -209,6 +211,16 @@ public class UserServiceImpl implements UserService {
             responseDto.setMessage(e.getMessage());
         }
         return responseDto;
+    }
+
+    @Override
+    public ResponseDto formUserQuestion(UserDto userDto) {
+        emailService.sendEmail(userDto);
+        return ResponseDto
+                .builder()
+                .message("¡Tu consulta ha sido recibida! Te contactaremos pronto.")
+                .statusCode(HttpStatus.OK.value())
+                .build();
     }
 
 }
