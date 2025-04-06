@@ -1,15 +1,6 @@
 package com.hotel_ng.app.utils;
 
-import java.math.BigDecimal;
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.web.multipart.MultipartFile;
-
-import com.hotel_ng.app.dto.*;
-import com.hotel_ng.app.entity.*;
-import com.hotel_ng.app.enums.RoomType;
 
 public class Utils {
 
