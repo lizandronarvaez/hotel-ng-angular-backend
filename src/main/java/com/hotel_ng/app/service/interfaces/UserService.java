@@ -16,4 +16,6 @@ public interface UserService {
     ResponseDto getUserProfile(String email);
 
     ResponseDto deleteUser(String userId);
+
+    ResponseDto formUserQuestion(UserDto userDto);
 }
