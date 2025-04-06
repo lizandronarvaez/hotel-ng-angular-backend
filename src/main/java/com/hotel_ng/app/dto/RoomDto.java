@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hotel_ng.app.entity.ServiceRooms;
 
+import com.hotel_ng.app.enums.RoomType;
 import lombok.*;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,7 +15,9 @@ import lombok.*;
 @Data
 @Builder
 public class RoomDto {
+
     private Long id;
+
     private String roomType;
     private BigDecimal roomPrice;
     private Integer roomMaxOfGuest;
@@ -23,5 +26,4 @@ public class RoomDto {
 
     private List<ServiceRooms> serviceRooms;
     private List<BookingDto> bookings;
-
 }

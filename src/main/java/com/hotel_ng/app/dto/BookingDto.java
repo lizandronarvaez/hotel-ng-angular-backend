@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingDto {
+
     private Long id;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
