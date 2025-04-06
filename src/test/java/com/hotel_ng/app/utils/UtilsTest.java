@@ -2,13 +2,6 @@ package com.hotel_ng.app.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.security.SecureRandom;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 class UtilsTest {
 
