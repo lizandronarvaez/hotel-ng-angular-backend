@@ -98,6 +98,7 @@ public class RoomController {
     }
 
     // obtener habitaciones disponibles por fecha y tipo de habitaciones
+    //todo:implementar paginado para la búsqueda
     @GetMapping("/available-rooms-by-date-and-type")
     public ResponseEntity<ResponseDto> getAvailableRoomsByDateAndType(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
