@@ -38,7 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/rooms/get-types-rooms",
             "/api/v1/rooms/all-available-rooms",
             "/api/v1/rooms/available-rooms-by-date-and-type",
-            "/api/v1/bookings/get-by-booking-code");
+            "/api/v1/bookings/get-by-booking-code",
+            "/api/v1/swagger-ui",
+            "/api/v1/v3/api-docs",
+            "/api/v1/users/form-contact"
+    );
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
