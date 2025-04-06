@@ -10,6 +10,7 @@ import lombok.*;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdminLoginDto {
+
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "Por favor, ingrese un email válido")
     private String email;
