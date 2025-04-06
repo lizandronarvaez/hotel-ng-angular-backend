@@ -3,10 +3,8 @@ package com.hotel_ng.app.mappers;
 import com.hotel_ng.app.dto.BookingDto;
 import com.hotel_ng.app.dto.RoomDto;
 import com.hotel_ng.app.entity.Booking;
-import com.hotel_ng.app.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 @Component
