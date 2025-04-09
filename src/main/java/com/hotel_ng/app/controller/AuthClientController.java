@@ -1,5 +1,6 @@
 package com.hotel_ng.app.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,12 +18,14 @@ public class AuthClientController {
 
     private final UserService userService;
 
+    @Tag(name = "Usuarios")
     @PostMapping("/register")
     public ResponseEntity<ResponseDto> registerUser(@Valid @RequestBody RegisterUserDto loginUserDto) {
         ResponseDto response = userService.register(loginUserDto);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @Tag(name = "Usuarios")
     @PostMapping("/login")
     public ResponseEntity<ResponseDto> loginUser(@Valid @RequestBody LoginUserDto loginUserDto) throws MethodArgumentNotValidException {
         ResponseDto response = userService.login(loginUserDto);

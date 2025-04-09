@@ -1,6 +1,7 @@
 package com.hotel_ng.app.controller;
 
 import com.hotel_ng.app.service.interfaces.BookingService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    // crear una nueva reserva
+    @Tag(name = "Usuarios")
     @PostMapping("/new-reservation/book-room/{roomId}/{userId}")
     public ResponseEntity<ResponseDto> bookRoom(
             @PathVariable("roomId") Long roomId,
@@ -27,7 +28,7 @@ public class BookingController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // listar todas las reservas
+    @Tag(name = "Administradores")
     @GetMapping("/all")
     public ResponseEntity<ResponseDto> getAllBookings() {
         ResponseDto response = bookingService.getAllBookings();
@@ -35,6 +36,7 @@ public class BookingController {
     }
 
     // Buscar las reservas
+    @Tag(name = "Público")
     @GetMapping("/get-by-booking-code/{bookingConfirmationCode}")
     public ResponseEntity<ResponseDto> getBookingsByConfirmationCode(
             @PathVariable("bookingConfirmationCode") String bookingConfirmationCode) {
@@ -43,6 +45,8 @@ public class BookingController {
     }
 
     // CANCELAR una reserva
+    @Tag(name = "Administradores")
+    @Tag(name = "Usuarios")
     @DeleteMapping("/cancel-booking/{bookingId}")
     public ResponseEntity<ResponseDto> cancelBooking(
             @PathVariable("bookingId") Long bookingId) {

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
@@ -23,7 +24,7 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    // crear habitación
+    @Tag(name = "Administradores")
     @PostMapping("/create-room")
     public ResponseEntity<ResponseDto> addNewRoom(
             @RequestParam(value = "roomImage", required = false) MultipartFile roomImage,
@@ -47,7 +48,7 @@ public class RoomController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // obtener todas las habitaciones
+    @Tag(name = "Público")
     @GetMapping("/get-all-rooms")
     public ResponseEntity<ResponseDto> getAllRooms(Pageable pageable) {
 
@@ -55,14 +56,14 @@ public class RoomController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // obtener una habitación
+    @Tag(name = "Público")
     @GetMapping("/get-room/{roomId}")
     public ResponseEntity<ResponseDto> getRoomById(@PathVariable("roomId") Long roomId) {
         ResponseDto response = roomService.getRoomById(roomId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // Actualizar una habitación
+    @Tag(name = "Administradores")
     @PutMapping("/update-room/{roomId}")
     public ResponseEntity<ResponseDto> updateRoom(
             @PathVariable("roomId") Long roomId,
@@ -76,7 +77,7 @@ public class RoomController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // eliminar una habitación
+    @Tag(name = "Administradores")
     @DeleteMapping("/delete-room/{roomId}")
     public ResponseEntity<ResponseDto> deleteRoom(@PathVariable("roomId") Long roomId) {
 
@@ -84,20 +85,20 @@ public class RoomController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // obtener los tipos de habtaciones
+    @Tag(name = "Público")
     @GetMapping("/get-types-rooms")
     public List<String> getTypesRooms() {
         return roomService.getAllRoomTypes();
     }
 
-    // obtener todas las habitaciones disponibles sin conocer las fechas
+    @Tag(name = "Público")
     @GetMapping("/all-available-rooms")
     public ResponseEntity<ResponseDto> getAvailableRooms() {
         ResponseDto response = roomService.getAvailableRooms();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    // obtener habitaciones disponibles por fecha y tipo de habitaciones
+    @Tag(name = "Público")
     //todo:implementar paginado para la búsqueda
     @GetMapping("/available-rooms-by-date-and-type")
     public ResponseEntity<ResponseDto> getAvailableRoomsByDateAndType(
