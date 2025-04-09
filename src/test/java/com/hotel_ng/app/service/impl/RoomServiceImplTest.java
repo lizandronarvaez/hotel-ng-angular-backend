@@ -9,7 +9,7 @@ import com.hotel_ng.app.mappers.RoomMapper;
 import com.hotel_ng.app.repository.RoomRepository;
 import com.hotel_ng.app.repository.RoomServiceRepository;
 import com.hotel_ng.app.uploads.cloudDinary.service.CloudDinaryService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,65 +43,95 @@ class RoomServiceImplTest {
     private RoomMapper roomMapper;
 
     @InjectMocks
-    RoomServiceImpl roomService;
+    private RoomServiceImpl roomService;
 
-    public RoomDto roomDto;
-    public Room room;
+    final static String URL_IMAGE_FAKE = "http://fake-image-url.com";
 
-    @BeforeEach()
-    void setUp() {
+    final static Room ROOM_PREPARED = Room.builder()
+            .id(1L)
+            .roomType(RoomType.PREMIUM)
+            .roomPrice(new BigDecimal("60.00"))
+            .roomDescription("Es una buena habitación")
+            .roomMaxOfGuest(2)
+            .roomImageUrl(URL_IMAGE_FAKE)
+            .build();
 
-        roomDto = RoomDto.builder().roomImageUrl("http://fake-image-url.com").roomType("familiar").roomPrice(new BigDecimal("30.00")).roomDescription("Es una buena habitación").roomMaxOfGuest(2).build();
+    final static Room ROOM_MODIFIED_PREPARED = Room.builder()
+            .id(1L)
+            .roomType(RoomType.PREMIUM)
+            .roomPrice(new BigDecimal("45.00"))
+            .roomDescription("Es una buena habitación")
+            .roomMaxOfGuest(2)
+            .roomImageUrl(URL_IMAGE_FAKE)
+            .build();
 
-        room = new Room();
-        room.setId(1L);
-        room.setRoomType(RoomType.STANDARD);
-        room.setRoomPrice(new BigDecimal("30.00"));
-        room.setRoomDescription("Es una buena habitación");
-        room.setRoomMaxOfGuest(2);
-        room.setRoomImageUrl("http://fake-image-url.com");
-    }
+    final static RoomDto ROOM_DTO_PREPARED = RoomDto
+            .builder()
+            .id(1L)
+            .roomImageUrl(URL_IMAGE_FAKE)
+            .roomType("FAMILIAR")
+            .roomPrice(new BigDecimal("30.00"))
+            .roomDescription("Es una buena habitación")
+            .roomMaxOfGuest(2)
+            .build();
 
     @Test
     void testAddNewRoom() throws IOException {
-        when(cloudDinaryService.uploadImage(multipartFile, "rooms")).thenReturn("http://fake-image-url.com");
 
-        ServiceRooms wifiService = new ServiceRooms();
-        wifiService.setName("Wi-Fi");
-        ServiceRooms tvService = new ServiceRooms();
-        tvService.setName("TV");
-        ServiceRooms acService = new ServiceRooms();
-        acService.setName("Aire Acondicionado");
+        when(cloudDinaryService.uploadImage(any(MultipartFile.class), anyString())).thenReturn(URL_IMAGE_FAKE);
 
-        when(roomServiceRepository.findByName("Wi-Fi")).thenReturn(Optional.empty());
-        when(roomServiceRepository.findByName("TV")).thenReturn(Optional.empty());
-        when(roomServiceRepository.findByName("Aire Acondicionado")).thenReturn(Optional.empty());
+        ServiceRooms wifiService = ServiceRooms.builder().name("Wi-Fi").build();
+        ServiceRooms tvService = ServiceRooms.builder().name("TV").build();
+        ServiceRooms acService = ServiceRooms.builder().name("Aire Acondicionado").build();
 
+        List<ServiceRooms> servicesList = new ArrayList<>();
+        servicesList.add(wifiService);
+        servicesList.add(tvService);
+        servicesList.add(acService);
+
+        when(roomServiceRepository.findByName(anyString())).thenReturn(Optional.empty());
         when(roomServiceRepository.save(any(ServiceRooms.class))).thenReturn(wifiService, tvService, acService);
 
-        RoomDto expectedRoomDto = new RoomDto();
+        when(roomMapper.mapRoomDtoToRoomEntity(
+                any(RoomType.class),
+                any(BigDecimal.class),
+                anyString(),
+                anyString(),
+                anyList(),
+                anyString()
+        )).thenReturn(ROOM_PREPARED);
 
-        when(roomMapper.mapRoomDtoToRoomEntity(eq(RoomType.STANDARD), eq(new BigDecimal("30.00")), eq("Es una buena habitación"), eq("2"), anyList(), eq("http://fake-image-url.com"))).thenReturn(room);
 
-        when(roomRepository.save(room)).thenReturn(room);
-        when(roomMapper.mapRoomEntityToRoomDto(room)).thenReturn(expectedRoomDto);
+        when(roomRepository.save(any(Room.class))).thenReturn(ROOM_PREPARED);
+        when(roomMapper.mapRoomEntityToRoomDto(any(Room.class))).thenReturn(ROOM_DTO_PREPARED);
 
-        ResponseDto response = roomService.addNewRoom(multipartFile, RoomType.STANDARD, new BigDecimal("30.00"), "Es una buena habitación", "2");
+        //llamada al servicio
+        ResponseDto response = roomService.addNewRoom(
+                multipartFile,
+                RoomType.STANDARD,
+                new BigDecimal("30.00"),
+                "Es una buena habitación",
+                "2"
+        );
 
-        // Assert
-        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        assertEquals("Operación exitosa", response.getMessage());
-        assertEquals(expectedRoomDto, response.getRoom());
 
-        verify(cloudDinaryService, times(1)).uploadImage(multipartFile, "rooms");
+        verify(cloudDinaryService, times(1)).uploadImage(any(MultipartFile.class), anyString());
         verify(roomServiceRepository, times(3)).findByName(anyString());
         verify(roomServiceRepository, times(3)).save(any(ServiceRooms.class));
 
+        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+        assertEquals("Operación exitosa", response.getMessage());
+        assertEquals(ROOM_DTO_PREPARED, response.getRoom());
     }
 
     @Test
     void testGetAllRoomTypes() {
-        List<String> roomTypes = List.of(Arrays.toString(RoomType.values()));
+        final Integer ROOM_TYPES_TOTAL = RoomType.values().length;
+
+        List<String> roomTypes = Arrays.stream(RoomType.values())
+                .map(types -> types.name().toUpperCase())
+                .collect(Collectors.toList());
+
         when(roomRepository.findDistinctRoomType()).thenReturn(roomTypes);
 
         List<String> result = roomService.getAllRoomTypes();
@@ -108,6 +139,7 @@ class RoomServiceImplTest {
         verify(roomRepository, times(1)).findDistinctRoomType();
         assertEquals(roomTypes, result);
         assertNotNull(result);
+        assertEquals(ROOM_TYPES_TOTAL, result.size());
     }
 
     @Test
@@ -118,7 +150,7 @@ class RoomServiceImplTest {
         List<RoomDto> roomDtos = Arrays.asList(new RoomDto(), new RoomDto());
         List<RoomDto> result = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
 
-        when(roomRepository.findAll(sortedPageable)).thenReturn(roomPage);
+        when(roomRepository.findAll(any(Pageable.class))).thenReturn(roomPage);
         when(roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent())).thenReturn(roomDtos);
 
         ResponseDto responseDto = roomService.getAllRooms(sortedPageable);
@@ -132,119 +164,89 @@ class RoomServiceImplTest {
         assertEquals(roomDtos, responseDto.getRoomList());
     }
 
-    @Test
-    void testDeleteRoom() {
-        Long idRoom = roomDto.getId();
-        Room room1 = new Room();
-        room1.setId(1L);
-        room1.setRoomType(RoomType.STANDARD);
-        room1.setRoomPrice(new BigDecimal("30.00"));
-        room1.setRoomDescription("Es una buena habitación");
-        room1.setRoomMaxOfGuest(2);
-        room1.setRoomImageUrl("http://fake-image-url.com");
-        when(roomRepository.findById(idRoom)).thenReturn(Optional.of(room1));
+    @Nested
+    class DeleteRoom {
 
-        ResponseDto responseDto = roomService.deleteRoom(idRoom);
+        @Test
+        void testDeleteRoom() {
 
-        assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
-        assertEquals("Operación exitosa", responseDto.getMessage());
+            when(roomRepository.findById(anyLong())).thenReturn(Optional.of(ROOM_PREPARED));
+            ResponseDto responseDto = roomService.deleteRoom(ROOM_PREPARED.getId());
+
+            verify(roomRepository, times(1)).findById(anyLong());
+            verify(roomRepository, times(1)).deleteById(anyLong());
+
+            assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
+            assertEquals("Operación exitosa", responseDto.getMessage());
+        }
+
+        @Test
+        void testDeleteRoom_NotFound() {
+            Long idRoom = 999L;
+            when(roomRepository.findById(idRoom)).thenReturn(Optional.empty());
+
+            ResponseDto responseDto = roomService.deleteRoom(idRoom);
+
+            verify(roomRepository, times(1)).findById(anyLong());
+            verify(roomRepository, times(0)).deleteById(anyLong());
+
+            assertEquals(HttpStatus.NOT_FOUND.value(), responseDto.getStatusCode());
+            assertEquals("No se encontró la habitación con el id: " + idRoom, responseDto.getMessage());
+        }
+
     }
-
-    @Test
-    void testDeleteRoom_NotFound() {
-        Long idRoom = 999L;
-        when(roomRepository.findById(idRoom)).thenReturn(Optional.empty());
-
-        ResponseDto responseDto = roomService.deleteRoom(idRoom);
-
-        assertEquals(HttpStatus.NOT_FOUND.value(), responseDto.getStatusCode());
-        assertEquals("No se encontró la habitación con el id: " + idRoom, responseDto.getMessage());
-    }
-
 
     @Test
     void testUpdateRoom() throws IOException {
-        // Preparar datos de entrada
-        Long roomId = 1L;
-        MultipartFile roomImageUrl = mock(MultipartFile.class);
-        RoomType roomType = RoomType.PREMIUM;
-        BigDecimal roomPrice = new BigDecimal("100.00");
-        String description = "Habitación moderna";
-        String roomMaxOfGuest = "4";
 
-        Room room = new Room();
-        Room savedRoom = new Room();
-        RoomDto roomDto = new RoomDto();
+        when(multipartFile.isEmpty()).thenReturn(false);
+        when(cloudDinaryService.uploadImage(any(MultipartFile.class), anyString())).thenReturn(URL_IMAGE_FAKE);
 
-        // Configurar mocks
-        when(roomImageUrl.isEmpty()).thenReturn(false);
-        when(cloudDinaryService.uploadImage(roomImageUrl, "rooms")).thenReturn("http://cloudinary.com/image.jpg");
-        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
-        when(roomRepository.save(any(Room.class))).thenReturn(savedRoom);
-        when(roomMapper.mapRoomEntityToRoomDto(savedRoom)).thenReturn(roomDto);
+        when(roomRepository.findById(anyLong())).thenReturn(Optional.of(ROOM_PREPARED));
+        when(roomRepository.save(any(Room.class))).thenReturn(ROOM_PREPARED);
+        when(roomMapper.mapRoomEntityToRoomDto(any(Room.class))).thenReturn(ROOM_DTO_PREPARED);
 
-        // Ejecutar el método
-        ResponseDto responseDto = roomService.updateRoom(roomId, roomImageUrl, roomType, roomPrice, description, roomMaxOfGuest);
+        ResponseDto responseDto = roomService.updateRoom(
+                ROOM_MODIFIED_PREPARED.getId(),
+                multipartFile,
+                RoomType.PREMIUM,
+                ROOM_MODIFIED_PREPARED.getRoomPrice(),
+                ROOM_MODIFIED_PREPARED.getRoomDescription(),
+                String.valueOf(ROOM_MODIFIED_PREPARED.getRoomMaxOfGuest()));
 
         // Verificar resultados
+        verify(roomRepository, times(1)).findById(anyLong());
+        verify(roomRepository, times(1)).save(any(Room.class));
+
         assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
         assertEquals("Operación exitosa", responseDto.getMessage());
-        assertEquals(roomDto, responseDto.getRoom());
+        assertEquals(ROOM_DTO_PREPARED, responseDto.getRoom());
     }
 
     @Test
     void testGetRoomById() {
 
-        Room room1 = new Room();
-        room1.setId(1L);
-        room1.setRoomType(RoomType.STANDARD);
-        room1.setRoomPrice(new BigDecimal("30.00"));
-        room1.setRoomDescription("Es una buena habitación");
-        room1.setRoomMaxOfGuest(2);
-        room1.setRoomImageUrl("http://fake-image-url.com");
+        when(roomRepository.findById(anyLong())).thenReturn(Optional.of(ROOM_PREPARED));
+        when(roomMapper.mapRoomEntityToRoomDto(any(Room.class))).thenReturn(ROOM_DTO_PREPARED);
 
-        RoomDto roomDto = new RoomDto();
-        roomDto.setId(1L);
-        roomDto.setRoomType(RoomType.STANDARD.name());
-        roomDto.setRoomPrice(new BigDecimal("30.00"));
-        roomDto.setRoomDescription("Es una buena habitación");
-        roomDto.setRoomMaxOfGuest(2);
-        roomDto.setRoomImageUrl("http://fake-image-url.com");
+        ResponseDto responseDto = roomService.getRoomById(ROOM_PREPARED.getId());
 
-        when(roomRepository.findById(room1.getId())).thenReturn(Optional.of(room1));
-        when(roomMapper.mapRoomEntityToRoomDto(room1)).thenReturn(roomDto);
-
-        ResponseDto responseDto = roomService.getRoomById(room1.getId());
-
+        verify(roomRepository, times(1)).findById(anyLong());
         assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
         assertEquals("Operación exitosa", responseDto.getMessage());
-        assertEquals(roomDto, responseDto.getRoom());
+        assertEquals(ROOM_DTO_PREPARED, responseDto.getRoom());
     }
 
     @Test
     void testGetAvailableRoomsByDateAndType() {
-        List<Room> roomList = List.of(room);
+        List<Room> roomList = List.of(ROOM_PREPARED);
 
-        when(roomRepository.findAvailableByDateAndTypes(any(), any(), any())).thenReturn(roomList);
-        when(roomMapper.mapRoomListEntityToRoomListDTO(roomList)).thenReturn(List.of(roomDto));
+        when(roomRepository.findAvailableByDateAndTypes(any(LocalDate.class), any(LocalDate.class), any(RoomType.class))).thenReturn(roomList);
+        when(roomMapper.mapRoomListEntityToRoomListDTO(anyList())).thenReturn(List.of(ROOM_DTO_PREPARED));
 
         ResponseDto response = roomService.getAvailableRoomsByDateAndType(LocalDate.now(), LocalDate.now(), RoomType.STANDARD);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        assertEquals("Operación exitosa", response.getMessage());
-        assertNotNull(response.getRoomList());
-        assertEquals(1, response.getRoomList().size());
-    }
-
-    @Test
-    void testGetAvailableRooms() {
-        List<Room> roomList = List.of(room);
-
-        when(roomRepository.findAllAvailableRooms()).thenReturn(roomList);
-        when(roomMapper.mapRoomListEntityToRoomListDTO(roomList)).thenReturn(List.of(roomDto));
-
-        ResponseDto response = roomService.getAvailableRooms();
+        verify(roomRepository, times(1)).findAvailableByDateAndTypes(any(), any(), any());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK.value(), response.getStatusCode());
@@ -253,27 +255,50 @@ class RoomServiceImplTest {
         assertEquals(1, response.getRoomList().size());
     }
 
-    @Test
-    void testGetAvailableRooms_NotFound() {
-        when(roomRepository.findAllAvailableRooms()).thenReturn(Collections.emptyList());
+    @Nested
+    class testAvailableRooms {
 
-        ResponseDto response = roomService.getAvailableRooms();
+        @Test
+        void testGetAvailableRooms() {
+            List<Room> roomList = List.of(ROOM_PREPARED);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        assertEquals("Operación exitosa", response.getMessage());
-        assertTrue(response.getRoomList().isEmpty());
+            when(roomRepository.findAllAvailableRooms()).thenReturn(roomList);
+            when(roomMapper.mapRoomListEntityToRoomListDTO(roomList)).thenReturn(List.of(ROOM_DTO_PREPARED));
+
+            ResponseDto response = roomService.getAvailableRooms();
+
+            verify(roomRepository, times(1)).findAllAvailableRooms();
+            assertNotNull(response);
+            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+            assertEquals("Operación exitosa", response.getMessage());
+            assertFalse(response.getRoomList().isEmpty());
+        }
+
+        @Test
+        void testGetAvailableRooms_NotFound() {
+
+            when(roomRepository.findAllAvailableRooms()).thenReturn(Collections.emptyList());
+
+            ResponseDto response = roomService.getAvailableRooms();
+
+            verify(roomRepository, times(1)).findAllAvailableRooms();
+            assertNotNull(response);
+            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+            assertEquals("Operación exitosa", response.getMessage());
+            assertTrue(response.getRoomList().isEmpty());
+        }
+
+        @Test
+        void testGetAvailableRooms_InternalServerError() {
+            when(roomRepository.findAllAvailableRooms()).thenThrow(new RuntimeException("Error inesperado"));
+
+            ResponseDto response = roomService.getAvailableRooms();
+
+            assertNotNull(response);
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
+            assertEquals("Hubo un error al realizar la operación: Error inesperado", response.getMessage());
+        }
     }
 
-    @Test
-    void testGetAvailableRooms_InternalServerError() {
-        when(roomRepository.findAllAvailableRooms()).thenThrow(new RuntimeException("Error inesperado"));
-
-        ResponseDto response = roomService.getAvailableRooms();
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode());
-        assertEquals("Hubo un error al realizar la operación: Error inesperado", response.getMessage());
-    }
 
 }
