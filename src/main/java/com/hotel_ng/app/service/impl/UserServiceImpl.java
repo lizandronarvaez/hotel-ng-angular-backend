@@ -78,7 +78,6 @@ public class UserServiceImpl implements UserService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginUserDto.getEmail(), loginUserDto.getPassword()));
 
-
             var token = jwtUtils.generateToken(user);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
