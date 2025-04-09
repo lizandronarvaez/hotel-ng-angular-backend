@@ -110,14 +110,19 @@
 
         <!--para hacer test con mockito y junit-->
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
+            <version>5.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
+            <version>5.14.2</version>
         </dependency>
         <!--        swagger documentation-->
         <dependency>
