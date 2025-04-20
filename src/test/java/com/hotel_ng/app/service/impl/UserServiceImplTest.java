@@ -10,9 +10,7 @@ import com.hotel_ng.app.mappers.BookingMapper;
 import com.hotel_ng.app.mappers.UserMapper;
 import com.hotel_ng.app.repository.UserRepository;
 import com.hotel_ng.app.security.utils.JwtUtils;
-import com.hotel_ng.app.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -51,15 +49,12 @@ class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
     @Mock
-    private BookingMapper bookingMapper;
-    @Mock
-    private EmailService emailService;
+    private EmailServiceImpl emailService;
 
     @InjectMocks
     private UserServiceImpl userService;
 
     private Client CLIENT_PREPARED;
-    private Client CLIENT_MODIFIED;
     private UserDto CLIENT_PREPARED_DTO;
 
     private RegisterUserDto REGISTER_USER_PREPARED;
@@ -82,16 +77,6 @@ class UserServiceImplTest {
                 .numberPhone("618429871")
                 .role(UserRole.ROLE_USER)
                 .password(passwordEncoder.encode("password"))
-                .build();
-
-        CLIENT_MODIFIED = Client.builder()
-                .id(1L)
-                .fullName("cliente modificado")
-                .email("cliente@modificado.com")
-                .numberPhone("618429871")
-                .role(UserRole.ROLE_USER)
-                .password(passwordEncoder.encode("password"))
-
                 .build();
 
         CLIENT_PREPARED_DTO = UserDto.builder()
@@ -224,24 +209,81 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(userMapper, times(1)).mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), any(BookingMapper.class));
 
-        assertEquals(HttpStatus.OK.value(),responseDto.getStatusCode());
+        assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
         assertEquals("¡Operación exitosa!", responseDto.getMessage());
-        assertEquals(CLIENT_PREPARED_DTO,responseDto.getUser());
+        assertEquals(CLIENT_PREPARED_DTO, responseDto.getUser());
     }
 
-    @Test
-    void getUserById() {
+    @Nested
+    class GetUser {
+        @Test
+        void testGetUserById_Success() {
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
+            when(userMapper.mapUserEntityToUserDto(any(Client.class))).thenReturn(CLIENT_PREPARED_DTO);
+
+            ResponseDto response = userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+
+            verify(userRepository, times(1)).findById(anyLong());
+            verify(userMapper, times(1)).mapUserEntityToUserDto(any(Client.class));
+
+            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+            assertEquals(CLIENT_PREPARED_DTO, response.getUser());
+            assertEquals("Usuario encontrado", response.getMessage());
+        }
+
+        @Test
+        void testGetUserById_Error() {
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            ResponseDto response = userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+
+            verify(userRepository, times(1)).findById(anyLong());
+            verify(userMapper, times(0)).mapUserEntityToUserDto(any(Client.class));
+
+            assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode());
+            assertEquals("Usuario no encontrado", response.getMessage());
+        }
     }
 
-    @Test
-    void getUserProfile() {
-    }
+    @Nested
+    class DeleteUser {
+        @Test
+        void testDeleteUserById_Success() {
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
 
-    @Test
-    void deleteUser() {
+            ResponseDto response = userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+
+            verify(userRepository, times(1)).findById(anyLong());
+            verify(userRepository, times(1)).deleteById(anyLong());
+
+            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+            assertEquals("Operación exitosa", response.getMessage());
+        }
+
+        @Test
+        void testDeleteUserById_Error() {
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            ResponseDto response = userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+
+            verify(userRepository, times(1)).findById(anyLong());
+            verify(userRepository, times(0)).deleteById(anyLong());
+
+            assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode());
+            assertEquals("Usuario no encontrado", response.getMessage());
+        }
     }
 
     @Test
     void formUserQuestion() {
+        doNothing().when(emailService).sendEmail(CLIENT_PREPARED_DTO);
+
+        ResponseDto response = userService.formUserQuestion(CLIENT_PREPARED_DTO);
+
+        verify(emailService, atLeastOnce()).sendEmail(CLIENT_PREPARED_DTO);
+
+        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+        assertEquals("¡Tu consulta ha sido recibida! Te contactaremos pronto.", response.getMessage());
+
     }
 }
