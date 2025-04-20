@@ -188,7 +188,7 @@ class RoomServiceImplTest {
             ResponseDto responseDto = roomService.deleteRoom(idRoom);
 
             verify(roomRepository, times(1)).findById(anyLong());
-            verify(roomRepository, times(0)).deleteById(anyLong());
+            verify(roomRepository, never()).deleteById(anyLong());
 
             assertEquals(HttpStatus.NOT_FOUND.value(), responseDto.getStatusCode());
             assertEquals("No se encontró la habitación con el id: " + idRoom, responseDto.getMessage());
