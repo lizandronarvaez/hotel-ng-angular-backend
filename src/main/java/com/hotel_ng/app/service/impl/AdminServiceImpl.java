@@ -29,7 +29,7 @@ public class AdminServiceImpl implements AdminService {
     private final AdminMapper adminMapper;
 
     @Value("${secret.authorizationAdmin}")
-    private String codeAuthorization;
+    private String CODE_AUTHORIZATION;
 
     @Override
     public ResponseDto register(AdminLoginDto loginUserDto) {
@@ -40,10 +40,9 @@ public class AdminServiceImpl implements AdminService {
             if (adminRepository.existsByEmail(loginUserDto.getEmail())) {
                 throw new OurException("Hubo un error al realizar la operación");
             }
-            if (!loginUserDto.getCodeAuthorization().equals(codeAuthorization)) {
+            if (!loginUserDto.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
                 throw new OurException("El código no es válido");
             }
-
 
             Admin admin = Admin.builder()
                     .email(loginUserDto.getEmail())
@@ -77,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
             var admin = adminRepository.findByEmail(loginUserDto.getEmail())
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
 
-            if (!loginUserDto.getCodeAuthorization().equals(codeAuthorization)) {
+            if (!loginUserDto.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
                 throw new OurException("El código no es válido");
             }
             if (!passwordEncoder.matches(loginUserDto.getPassword(), admin.getPassword())) {
