@@ -99,11 +99,11 @@ public class BookingServiceImpl implements BookingService {
         ResponseDto responseDto = new ResponseDto();
         try {
             List<Booking> bookings = bookingRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-            List<BookingDto> listBookingDtos = bookingMapper.mapBookingListEntityToBookingDtoList(bookings);
+            List<BookingDto> listBookingsDto = bookingMapper.mapBookingListEntityToBookingDtoList(bookings);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
-            responseDto.setBookingList(listBookingDtos);
+            responseDto.setBookingList(listBookingsDto);
 
         } catch (Exception e) {
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());

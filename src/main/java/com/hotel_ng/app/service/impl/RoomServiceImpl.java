@@ -74,9 +74,9 @@ public class RoomServiceImpl implements RoomService {
                     pageable.getPageSize(),
                     Sort.by(Sort.Direction.ASC, "id"));
             Page<Room> roomPage = roomRepository.findAll(sortedPageable);
-            List<RoomDto> roomDtos = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
+            List<RoomDto> roomsDto = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
 
-            responseDto.setRoomList(roomDtos);
+            responseDto.setRoomList(roomsDto);
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
 

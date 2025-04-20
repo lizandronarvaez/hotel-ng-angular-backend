@@ -103,11 +103,11 @@ public class UserServiceImpl implements UserService {
 
         try {
             List<Client> users = userRepository.findAll();
-            List<UserDto> userDtos = this.userMapper.mapUserListEntityToUserDtoList(users);
+            List<UserDto> usersDto = this.userMapper.mapUserListEntityToUserDtoList(users);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Lista de usuarios");
-            responseDto.setUserList(userDtos);
+            responseDto.setUserList(usersDto);
 
         } catch (Exception e) {
             responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
