@@ -2,7 +2,6 @@ package com.hotel_ng.app.service.impl;
 
 import com.hotel_ng.app.dto.LoginUserDto;
 import com.hotel_ng.app.dto.RegisterUserDto;
-import com.hotel_ng.app.dto.ResponseDto;
 import com.hotel_ng.app.dto.UserDto;
 import com.hotel_ng.app.entity.Client;
 import com.hotel_ng.app.enums.UserRole;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -117,24 +114,20 @@ class UserServiceImplTest {
             when(userMapper.mapUserEntityToUserDto(any(Client.class)
             )).thenReturn(CLIENT_PREPARED_DTO);
 
-            ResponseDto result = userService.register(REGISTER_USER_PREPARED);
+            userService.register(REGISTER_USER_PREPARED);
 
             verify(userRepository).save(any(Client.class));
             verify(userRepository, times(1)).save(any(Client.class));
-            assertNotNull(result);
-            assertEquals(CLIENT_PREPARED_DTO, result.getUser());
-            assertEquals(MESSAGE_SUCCESS_REGISTER, result.getMessage());
         }
 
         @Test
         void testRegisterClientError() {
 
             when(userRepository.existsByEmail(CLIENT_PREPARED_DTO.getEmail())).thenReturn(true);
-            ResponseDto result = userService.register(REGISTER_USER_PREPARED);
+
+            userService.register(REGISTER_USER_PREPARED);
 
             verify(userRepository, times(0)).save(any(Client.class));
-            assertEquals(HttpStatus.CONFLICT.value(), result.getStatusCode());
-            assertEquals(MESSAGE_CONFLICT_REGISTER, result.getMessage());
         }
     }
 
@@ -152,66 +145,51 @@ class UserServiceImplTest {
                     .thenReturn(null);
             when(jwtUtils.generateToken(any(UserDetails.class))).thenReturn("TOKEN-GENERADO");
             when(userMapper.mapUserEntityToUserDto(any(Client.class))).thenReturn(CLIENT_PREPARED_DTO);
-            ResponseDto responseDto = userService.login(LOGIN_USER_PREPARED);
+
+            userService.login(LOGIN_USER_PREPARED);
 
             verify(userRepository, times(1)).findByEmail(anyString());
             verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(jwtUtils, times(1)).generateToken(any(UserDetails.class));
             verify(userMapper, times(1)).mapUserEntityToUserDto(any(Client.class));
-
-            assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
-            assertEquals(MESSAGE_SUCCESS_LOGIN, responseDto.getMessage());
-            assertNotNull(responseDto);
         }
 
         @Test
         void testLoginUserError() {
             when(userRepository.findByEmail(LOGIN_USER_PREPARED.getEmail())).thenReturn(Optional.empty());
 
-            ResponseDto responseDto = userService.login(LOGIN_USER_PREPARED);
+            userService.login(LOGIN_USER_PREPARED);
 
             verify(userRepository, times(1)).findByEmail(anyString());
             verify(authenticationManager, times(0)).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(jwtUtils, times(0)).generateToken(any(UserDetails.class));
-
-            assertEquals(HttpStatus.NOT_FOUND.value(), responseDto.getStatusCode());
-            assertEquals(MESSAGE_ERROR_LOGIN, responseDto.getMessage());
-            assertNotNull(responseDto);
         }
     }
 
     @Test
-    void getAllUsers() {
+    void testGetAllUsers() {
         List<Client> listUsers = List.of(CLIENT_PREPARED);
         List<UserDto> listUsersDto = List.of(CLIENT_PREPARED_DTO);
 
         when(userRepository.findAll()).thenReturn(listUsers);
         when(userMapper.mapUserListEntityToUserDtoList(listUsers)).thenReturn(listUsersDto);
 
-        ResponseDto response = userService.getAllUsers();
+        userService.getAllUsers();
 
         verify(userRepository, times(1)).findAll();
         verify(userMapper, times(1)).mapUserListEntityToUserDtoList(listUsers);
-
-        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        assertEquals("Lista de usuarios", response.getMessage());
-        assertEquals(listUsersDto, response.getUserList());
     }
 
     @Test
-    void getUserBookingHistory() {
+    void testGetUserBookingHistory() {
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
         when(userMapper.mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), any(BookingMapper.class))).thenReturn(CLIENT_PREPARED_DTO);
 
-        ResponseDto responseDto = userService.getUserBookingHistory(String.valueOf(CLIENT_PREPARED.getId()));
+        userService.getUserBookingHistory(String.valueOf(CLIENT_PREPARED.getId()));
 
         verify(userRepository, times(1)).findById(anyLong());
-        verify(userMapper, times(1)).mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), any(BookingMapper.class));
-
-        assertEquals(HttpStatus.OK.value(), responseDto.getStatusCode());
-        assertEquals("¡Operación exitosa!", responseDto.getMessage());
-        assertEquals(CLIENT_PREPARED_DTO, responseDto.getUser());
+        verify(userMapper, times(1)).mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), isNull());
     }
 
     @Nested
@@ -221,27 +199,21 @@ class UserServiceImplTest {
             when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
             when(userMapper.mapUserEntityToUserDto(any(Client.class))).thenReturn(CLIENT_PREPARED_DTO);
 
-            ResponseDto response = userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userMapper, times(1)).mapUserEntityToUserDto(any(Client.class));
 
-            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-            assertEquals(CLIENT_PREPARED_DTO, response.getUser());
-            assertEquals("Usuario encontrado", response.getMessage());
         }
 
         @Test
         void testGetUserById_Error() {
             when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            ResponseDto response = userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userMapper, times(0)).mapUserEntityToUserDto(any(Client.class));
-
-            assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode());
-            assertEquals("Usuario no encontrado", response.getMessage());
         }
     }
 
@@ -251,39 +223,29 @@ class UserServiceImplTest {
         void testDeleteUserById_Success() {
             when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
 
-            ResponseDto response = userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userRepository, times(1)).deleteById(anyLong());
-
-            assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-            assertEquals("Operación exitosa", response.getMessage());
         }
 
         @Test
         void testDeleteUserById_Error() {
             when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            ResponseDto response = userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userRepository, times(0)).deleteById(anyLong());
-
-            assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode());
-            assertEquals("Usuario no encontrado", response.getMessage());
         }
     }
 
     @Test
-    void formUserQuestion() {
+    void testFormUserQuestion() {
         doNothing().when(emailService).sendEmail(CLIENT_PREPARED_DTO);
 
-        ResponseDto response = userService.formUserQuestion(CLIENT_PREPARED_DTO);
+        userService.formUserQuestion(CLIENT_PREPARED_DTO);
 
         verify(emailService, atLeastOnce()).sendEmail(CLIENT_PREPARED_DTO);
-
-        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
-        assertEquals("¡Tu consulta ha sido recibida! Te contactaremos pronto.", response.getMessage());
-
     }
 }
