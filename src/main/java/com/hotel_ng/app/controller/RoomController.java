@@ -51,7 +51,7 @@ public class RoomController {
     @Tag(name = "Público")
     @GetMapping("/get-all-rooms")
     public ResponseEntity<ResponseDto> getAllRooms(Pageable pageable) {
-
+        
         ResponseDto response = roomService.getAllRooms(pageable);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
