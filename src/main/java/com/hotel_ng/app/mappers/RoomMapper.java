@@ -1,6 +1,6 @@
 package com.hotel_ng.app.mappers;
 
-import com.hotel_ng.app.dto.RoomDto;
+import com.hotel_ng.app.dto.RoomDTO;
 import com.hotel_ng.app.entity.Room;
 import com.hotel_ng.app.entity.ServiceRooms;
 import com.hotel_ng.app.enums.RoomType;
@@ -27,8 +27,8 @@ public class RoomMapper {
                 .build();
     }
 
-    public RoomDto mapRoomEntityToRoomDto(Room room) {
-        return RoomDto.builder()
+    public RoomDTO mapRoomEntityToRoomDto(Room room) {
+        return RoomDTO.builder()
                 .id(room.getId())
                 .roomType(room.getRoomType().name().toLowerCase())
                 .roomPrice(room.getRoomPrice())
@@ -39,8 +39,8 @@ public class RoomMapper {
                 .build();
     }
 
-    public RoomDto mapRoomEntityToRoomDtoWithBooking(Room booking,BookingMapper bookingMapper) {
-        RoomDto roomDto = RoomDto.builder()
+    public RoomDTO mapRoomEntityToRoomDtoWithBooking(Room booking, BookingMapper bookingMapper) {
+        RoomDTO roomDto = RoomDTO.builder()
                 .id(booking.getId())
                 .roomType(booking.getRoomType().name())
                 .roomMaxOfGuest(booking.getRoomMaxOfGuest())
@@ -58,7 +58,7 @@ public class RoomMapper {
         return roomDto;
     }
 
-    public List<RoomDto> mapRoomListEntityToRoomListDTO(List<Room> roomList) {
+    public List<RoomDTO> mapRoomListEntityToRoomListDTO(List<Room> roomList) {
         return roomList.stream().map(this::mapRoomEntityToRoomDto).collect(Collectors.toList());
     }
 }

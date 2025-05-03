@@ -1,7 +1,7 @@
 package com.hotel_ng.app.mappers;
 
-import com.hotel_ng.app.dto.UserDto;
-import com.hotel_ng.app.entity.Client;
+import com.hotel_ng.app.dto.UserDTO;
+import com.hotel_ng.app.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +11,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMapper {
 
-    public UserDto mapUserEntityToUserDto(Client user) {
-        return UserDto.builder()
+    public UserDTO mapUserEntityToUserDto(User user) {
+        return UserDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
@@ -21,14 +21,14 @@ public class UserMapper {
                 .build();
     }
 
-    public List<UserDto> mapUserListEntityToUserDtoList(List<Client> users) {
+    public List<UserDTO> mapUserListEntityToUserDtoList(List<User> users) {
         return users.stream()
                 .map(this::mapUserEntityToUserDto)
                 .toList();
     }
 
-    public UserDto mapUserEntityToUserDtoWithBookingAndRoom(Client user,BookingMapper bookingMapper) {
-        UserDto userDto = UserDto.builder()
+    public UserDTO mapUserEntityToUserDtoWithBookingAndRoom(User user, BookingMapper bookingMapper) {
+        UserDTO userDto = UserDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
