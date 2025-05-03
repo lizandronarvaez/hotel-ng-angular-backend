@@ -18,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.enums.Role;
 
 
 import org.springframework.security.web.SecurityFilterChain;
@@ -48,27 +48,27 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/users/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/all-users")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
 
                         .requestMatchers(HttpMethod.GET, "/users/get-user/**")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
 
                         .requestMatchers(HttpMethod.GET, "/users/get-profile-user-info").authenticated()
                         .requestMatchers(HttpMethod.GET, "/users/get-user-bookings/**")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
 
                         .requestMatchers(HttpMethod.GET, "/users/delete-user/**")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
 
                         // reservas
                         .requestMatchers(HttpMethod.POST, "/bookings/new-reservation/book-room/**")
-                        .hasAnyAuthority(UserRole.ROLE_ADMIN.name(), UserRole.ROLE_USER.name())
+                        .hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
 
                         .requestMatchers(HttpMethod.GET, "/bookings/all")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
 
                         .requestMatchers(HttpMethod.DELETE, "/bookings/cancel-booking")
-                        .hasAnyAuthority(UserRole.ROLE_ADMIN.name(), UserRole.ROLE_USER.name())
+                        .hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
 
                         .requestMatchers(HttpMethod.GET, "/bookings/get-by-booking-code/**").permitAll()
 
@@ -81,7 +81,7 @@ public class SecurityConfig {
                                 "/rooms/create-room",
                                 "/rooms/update-room/**",
                                 "/rooms/delete-room/**")
-                        .hasAuthority(UserRole.ROLE_ADMIN.name())
+                        .hasAuthority(Role.ROLE_ADMIN.name())
                         // pruebas con swagger
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
