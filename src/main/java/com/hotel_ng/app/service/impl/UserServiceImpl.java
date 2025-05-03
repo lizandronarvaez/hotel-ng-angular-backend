@@ -2,6 +2,10 @@ package com.hotel_ng.app.service.impl;
 
 import java.util.List;
 
+import com.hotel_ng.app.dto.request.RequestFormQuestionDTO;
+import com.hotel_ng.app.dto.request.RequestLoginUserDTO;
+import com.hotel_ng.app.dto.request.RequestRegisterUserDTO;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.mappers.BookingMapper;
 import com.hotel_ng.app.mappers.UserMapper;
 import com.hotel_ng.app.service.interfaces.EmailService;
@@ -12,8 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hotel_ng.app.dto.*;
-import com.hotel_ng.app.entity.Client;
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.entity.User;
+import com.hotel_ng.app.enums.Role;
 import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.repository.UserRepository;
 import com.hotel_ng.app.security.utils.JwtUtils;
@@ -34,188 +38,190 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
 
     @Override
-    public ResponseDto register(RegisterUserDto loginUserDto) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO register(RequestRegisterUserDTO requestRegisterUserDTO) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            if (userRepository.existsByEmail(loginUserDto.getEmail())) {
-                throw new OurException(loginUserDto.getEmail() + " ya existe");
+            if (userRepository.existsByEmail(requestRegisterUserDTO.getEmail())) {
+                throw new OurException(requestRegisterUserDTO.getEmail() + " ya existe");
             }
 
-            Client user = Client.builder()
-                    .email(loginUserDto.getEmail())
-                    .fullName(loginUserDto.getFullName())
-                    .numberPhone(loginUserDto.getNumberPhone())
-                    .password(passwordEncoder.encode(loginUserDto.getPassword()))
-                    .role(UserRole.ROLE_USER)
+            User user = User.builder()
+                    .email(requestRegisterUserDTO.getEmail())
+                    .fullName(requestRegisterUserDTO.getFullName())
+                    .numberPhone(requestRegisterUserDTO.getNumberPhone())
+                    .password(passwordEncoder.encode(requestRegisterUserDTO.getPassword()))
+                    .role(Role.ROLE_USER)
                     .build();
-            Client userSaved = userRepository.save(user);
-            UserDto userDto = this.userMapper.mapUserEntityToUserDto(userSaved);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Usuario registrado con éxito");
-            responseDto.setUser(userDto);
+            User userSaved = userRepository.save(user);
+            UserDTO userDTO = this.userMapper.mapUserEntityToUserDto(userSaved);
+
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Usuario registrado con éxito");
+            responseDTO.setUser(userDTO);
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.CONFLICT.value());
-            responseDto.setMessage("Error al registrar usuario: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.CONFLICT.value());
+            responseDTO.setMessage("Error al registrar usuario: " + e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Error al registrar usuario: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Error al registrar usuario: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto login(LoginUserDto loginUserDto) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO login(RequestLoginUserDTO requestLoginUserDTO) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            var user = userRepository.findByEmail(loginUserDto.getEmail())
+            var user = userRepository.findByEmail(requestLoginUserDTO.getEmail())
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
 
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginUserDto.getEmail(), loginUserDto.getPassword()));
+                    new UsernamePasswordAuthenticationToken(requestLoginUserDTO.getEmail(), requestLoginUserDTO.getPassword()));
 
             var token = jwtUtils.generateToken(user);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Usuario logueado con éxito");
-            responseDto.setUser(this.userMapper.mapUserEntityToUserDto(user));
-            responseDto.setToken(token);
-            responseDto.setRole(user.getRole().name());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Usuario logueado con éxito");
+            responseDTO.setUser(this.userMapper.mapUserEntityToUserDto(user));
+            responseDTO.setToken(token);
+            responseDTO.setRole(user.getRole().name());
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage("Error al iniciar sesión: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage("Error al iniciar sesión: " + e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Error realizar el login: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Error realizar el login: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto getAllUsers() {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getAllUsers() {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            List<Client> users = userRepository.findAll();
-            List<UserDto> usersDto = this.userMapper.mapUserListEntityToUserDtoList(users);
+            List<User> users = userRepository.findAll();
+            List<UserDTO> usersDTO = this.userMapper.mapUserListEntityToUserDtoList(users);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Lista de usuarios");
-            responseDto.setUserList(usersDto);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Lista de usuarios");
+            responseDTO.setUserList(usersDTO);
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error en la petición: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error en la petición: " + e.getMessage());
         }
 
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto getUserBookingHistory(String userId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getUserBookingHistory(String userId) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            Client user = userRepository.findById(Long.valueOf(userId))
+            User user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = this.userMapper.mapUserEntityToUserDtoWithBookingAndRoom(user, bookingMapper);
+            UserDTO userDTO = this.userMapper.mapUserEntityToUserDtoWithBookingAndRoom(user, bookingMapper);
 
-            responseDto.setMessage("¡Operación exitosa!");
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setUser(userDto);
+            responseDTO.setMessage("¡Operación exitosa!");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setUser(userDTO);
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error en la petición: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error en la petición: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto getUserById(String userId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getUserById(String userId) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            Client user = userRepository.findById(Long.valueOf(userId))
+            User user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = this.userMapper.mapUserEntityToUserDto(user);
+            UserDTO userDto = this.userMapper.mapUserEntityToUserDto(user);
 
-            responseDto.setMessage("Usuario encontrado");
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setUser(userDto);
+            responseDTO.setMessage("Usuario encontrado");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setUser(userDto);
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto getUserProfile(String email) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getUserProfile(String email) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            Client user = userRepository.findByEmail(email)
+            User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
-            UserDto userDto = this.userMapper.mapUserEntityToUserDto(user);
+            UserDTO userDto = this.userMapper.mapUserEntityToUserDto(user);
 
-            responseDto.setMessage("Usuario encontrado");
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setUser(userDto);
+            responseDTO.setMessage("Usuario encontrado");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setUser(userDto);
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto deleteUser(String userId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO deleteUser(String userId) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
             userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
             userRepository.deleteById(Long.valueOf(userId));
 
-            responseDto.setMessage("Operación exitosa");
-            responseDto.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Operación exitosa");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage(e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto formUserQuestion(UserDto userDto) {
-        emailService.sendEmail(userDto);
-        return ResponseDto
+    public ResponseDTO formUserQuestion(RequestFormQuestionDTO formQuestionDTO) {
+        emailService.sendEmail(formQuestionDTO);
+
+        return ResponseDTO
                 .builder()
                 .message("¡Tu consulta ha sido recibida! Te contactaremos pronto.")
                 .statusCode(HttpStatus.OK.value())

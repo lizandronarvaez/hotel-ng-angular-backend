@@ -1,6 +1,6 @@
 package com.hotel_ng.app.service.impl;
 
-import com.hotel_ng.app.dto.UserDto;
+import com.hotel_ng.app.dto.request.RequestFormQuestionDTO;
 import com.hotel_ng.app.service.interfaces.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -25,17 +25,17 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendEmail(UserDto userDto) {
+    public void sendEmail(RequestFormQuestionDTO formQuestionDTO) {
         try {
 
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
             messageHelper.setFrom(username, "Hotel AngularNG <no-reply@hotelng.com>");
-            messageHelper.setTo(userDto.getEmail().trim());
+            messageHelper.setTo(formQuestionDTO.getEmail().trim().toLowerCase());
             messageHelper.setSubject("Tu consulta fue recibida");
 
-            String htmlContent = "<p>Nos pondremos en contacto a la mayor brevedad posible</p>\n" + "Motivo de la consulta: " + userDto.getMessage();
+            String htmlContent = "<p>Nos pondremos en contacto a la mayor brevedad posible</p>\n" + "Motivo de la consulta: " + formQuestionDTO.getMessage();
             messageHelper.setText(htmlContent, true);
 
             javaMailSender.send(message);
@@ -43,7 +43,7 @@ public class EmailServiceImpl implements EmailService {
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage());
         } catch (MessagingException e) {
-            log.error("Hubo un error al enviar el correo a {}: {}", userDto.getEmail(), e.getMessage(), e);
+            log.error("Hubo un error al enviar el correo a {}: {}", formQuestionDTO.getEmail(), e.getMessage(), e);
         }
     }
 }

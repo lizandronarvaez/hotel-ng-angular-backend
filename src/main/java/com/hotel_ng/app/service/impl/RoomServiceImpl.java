@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.mappers.RoomMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,9 +34,9 @@ public class RoomServiceImpl implements RoomService {
     private final RoomMapper roomMapper;
 
     @Override
-    public ResponseDto addNewRoom(MultipartFile roomImage, RoomType roomType, BigDecimal roomPrice, String description,
+    public ResponseDTO addNewRoom(MultipartFile roomImage, RoomType roomType, BigDecimal roomPrice, String description,
                                   String roomMaxOfGuest) {
-        ResponseDto responseDto = new ResponseDto();
+        ResponseDTO responseDto = new ResponseDTO();
         List<ServiceRooms> services = findOrCreateServices(roomType);
         String imageUrl = null;
 
@@ -46,7 +47,7 @@ public class RoomServiceImpl implements RoomService {
             Room room = roomMapper.mapRoomDtoToRoomEntity(roomType, roomPrice, description, roomMaxOfGuest,
                     services, imageUrl);
             roomRepository.save(room);
-            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(room);
+            RoomDTO roomDto = roomMapper.mapRoomEntityToRoomDto(room);
 
             responseDto.setRoom(roomDto);
             responseDto.setMessage("Operación exitosa");
@@ -65,8 +66,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getAllRooms(Pageable pageable) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getAllRooms(Pageable pageable) {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             Pageable sortedPageable = PageRequest.of(
@@ -74,7 +75,7 @@ public class RoomServiceImpl implements RoomService {
                     pageable.getPageSize(),
                     Sort.by(Sort.Direction.ASC, "id"));
             Page<Room> roomPage = roomRepository.findAll(sortedPageable);
-            List<RoomDto> roomsDto = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
+            List<RoomDTO> roomsDto = roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent());
 
             responseDto.setRoomList(roomsDto);
             responseDto.setMessage("Operación exitosa");
@@ -93,8 +94,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto deleteRoom(Long roomId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO deleteRoom(Long roomId) {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             roomRepository.findById(roomId)
@@ -116,9 +117,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto updateRoom(Long roomId, MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice,
+    public ResponseDTO updateRoom(Long roomId, MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice,
                                   String description, String roomMaxOfGuest) {
-        ResponseDto responseDto = new ResponseDto();
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             String imageUrl = null;
@@ -137,7 +138,7 @@ public class RoomServiceImpl implements RoomService {
             roomUpdate.setRoomMaxOfGuest(Integer.parseInt(roomMaxOfGuest));
 
             Room savedRoom = roomRepository.save(roomUpdate);
-            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(savedRoom);
+            RoomDTO roomDto = roomMapper.mapRoomEntityToRoomDto(savedRoom);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -151,13 +152,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getRoomById(Long roomId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getRoomById(Long roomId) {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             Room room = roomRepository.findById(roomId)
                     .orElseThrow(() -> new OurException("No se encontró la habitación con el id: " + roomId));
-            RoomDto roomDto = roomMapper.mapRoomEntityToRoomDto(room);
+            RoomDTO roomDto = roomMapper.mapRoomEntityToRoomDto(room);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
@@ -175,13 +176,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType) {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             List<Room> availableRooms = roomRepository.findAvailableByDateAndTypes(checkInDate, checkOutDate,
                     roomType);
-            List<RoomDto> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
+            List<RoomDTO> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
@@ -199,12 +200,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseDto getAvailableRooms() {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getAvailableRooms() {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             List<Room> availableRooms = roomRepository.findAllAvailableRooms();
-            List<RoomDto> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
+            List<RoomDTO> roomListDto = roomMapper.mapRoomListEntityToRoomListDTO(availableRooms);
 
             responseDto.setMessage("Operación exitosa");
             responseDto.setStatusCode(HttpStatus.OK.value());
