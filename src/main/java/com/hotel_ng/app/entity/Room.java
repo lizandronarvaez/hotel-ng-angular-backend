@@ -34,9 +34,12 @@ public class Room {
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "room_services", // Nombre de la tabla de unión
-            joinColumns = @JoinColumn(name = "room_id"), // Columna que referencia a Room
-            inverseJoinColumns = @JoinColumn(name = "service_id") // Columna que referencia a ServiceRooms
+    // Nombre de la tabla de unión
+    @JoinTable(name = "room_services",
+            // Columna que referencia a Room
+            joinColumns = @JoinColumn(name = "room_id"),
+            // Columna que referencia a ServiceRooms
+            inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     private List<ServiceRooms> services = new ArrayList<>();
 

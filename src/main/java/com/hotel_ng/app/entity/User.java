@@ -8,7 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.enums.Role;
 
 @Builder
 @Getter
@@ -17,7 +17,7 @@ import com.hotel_ng.app.enums.UserRole;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class Client implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -29,7 +29,7 @@ public class Client implements UserDetails {
     private String numberPhone;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private Role role;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
