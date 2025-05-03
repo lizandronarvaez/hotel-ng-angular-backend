@@ -10,19 +10,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.hotel_ng.app.dto.ResponseDto;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 
 @RestControllerAdvice
 public class HandleValidationFieldExceptions {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ResponseDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
-        ResponseDto errorResponse = new ResponseDto();
+        ResponseDTO errorResponse = new ResponseDTO();
         errorResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("Errores de validación");
         errorResponse.setErrors(errors);
