@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.hotel_ng.app.dto.ResponseDto;
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.dto.response.ResponseDTO;
+import com.hotel_ng.app.enums.Role;
 import com.hotel_ng.app.security.utils.JwtUtils;
 import com.hotel_ng.app.service.impl.AdminDetailsServiceImpl;
 import com.hotel_ng.app.service.impl.UserDetailsServiceImpl;
@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Verificar el rol del token
-        if (!userRoleClaims.equals(UserRole.ROLE_USER.name()) && !userRoleClaims.equals(UserRole.ROLE_ADMIN.name())) {
+        if (!userRoleClaims.equals(Role.ROLE_USER.name()) && !userRoleClaims.equals(Role.ROLE_ADMIN.name())) {
             sendUnauthorizedResponseWithMessage(response, HttpServletResponse.SC_UNAUTHORIZED,
                     "Rol no reconocido en el token");
             return;
@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Cargar UserDetails según el rol
         UserDetails userDetails;
-        if (userRoleClaims.equals(UserRole.ROLE_USER.name())) {
+        if (userRoleClaims.equals(Role.ROLE_USER.name())) {
             userDetails = this.userDetailsService.loadUserByUsername(userEmailClaims);
         } else {
             userDetails = this.adminDetailsService.loadUserByUsername(userEmailClaims);
@@ -153,14 +153,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ) {
             // Solo los usuarios con ROLE_ADMIN pueden acceder a estos endpoints
             return userDetails.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getAuthority().equals(UserRole.ROLE_ADMIN.name()));
+                    .anyMatch(authority -> authority.getAuthority().equals(Role.ROLE_ADMIN.name()));
         }
         return true;
     }
 
     private void sendUnauthorizedResponseWithMessage(HttpServletResponse response, int statusCode, String message)
             throws IOException {
-        ResponseDto errorResponse = new ResponseDto();
+        ResponseDTO errorResponse = new ResponseDTO();
         errorResponse.setStatusCode(statusCode);
         errorResponse.setMessage(message);
 
