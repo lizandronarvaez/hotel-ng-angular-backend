@@ -1,6 +1,6 @@
 package com.hotel_ng.app.service.impl;
 
-import com.hotel_ng.app.dto.RoomDto;
+import com.hotel_ng.app.dto.RoomDTO;
 import com.hotel_ng.app.entity.Room;
 import com.hotel_ng.app.entity.ServiceRooms;
 import com.hotel_ng.app.enums.RoomType;
@@ -42,9 +42,9 @@ class RoomServiceImplTest {
     @InjectMocks
     private RoomServiceImpl roomService;
 
-    final static String URL_IMAGE_FAKE = "http://fake-image-url.com";
+    static String URL_IMAGE_FAKE = "http://fake-image-url.com";
 
-    final static Room ROOM_PREPARED = Room.builder()
+    static Room ROOM_PREPARED = Room.builder()
             .id(1L)
             .roomType(RoomType.PREMIUM)
             .roomPrice(new BigDecimal("60.00"))
@@ -53,7 +53,7 @@ class RoomServiceImplTest {
             .roomImageUrl(URL_IMAGE_FAKE)
             .build();
 
-    final static Room ROOM_MODIFIED_PREPARED = Room.builder()
+    static Room ROOM_MODIFIED_PREPARED = Room.builder()
             .id(1L)
             .roomType(RoomType.PREMIUM)
             .roomPrice(new BigDecimal("45.00"))
@@ -62,7 +62,7 @@ class RoomServiceImplTest {
             .roomImageUrl(URL_IMAGE_FAKE)
             .build();
 
-    final static RoomDto ROOM_DTO_PREPARED = RoomDto
+    static RoomDTO ROOM_DTO_PREPARED = RoomDTO
             .builder()
             .id(1L)
             .roomImageUrl(URL_IMAGE_FAKE)
@@ -130,7 +130,7 @@ class RoomServiceImplTest {
         Pageable sortedPageable = PageRequest.of(1, 5, Sort.by(Sort.Direction.ASC, "id"));
         List<Room> roomList = Arrays.asList(new Room(), new Room());
         Page<Room> roomPage = new PageImpl<>(roomList, sortedPageable, 10);
-        List<RoomDto> roomsDTO = Arrays.asList(new RoomDto(), new RoomDto());
+        List<RoomDTO> roomsDTO = Arrays.asList(new RoomDTO(), new RoomDTO());
 
         when(roomRepository.findAll(any(Pageable.class))).thenReturn(roomPage);
         when(roomMapper.mapRoomListEntityToRoomListDTO(roomPage.getContent())).thenReturn(roomsDTO);
