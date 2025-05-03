@@ -1,6 +1,6 @@
 package com.hotel_ng.app.entity;
 
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +25,7 @@ public class Admin implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -37,23 +37,4 @@ public class Admin implements UserDetails {
         return this.getEmail();
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

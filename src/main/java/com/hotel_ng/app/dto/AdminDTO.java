@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AdminDto {
+public class AdminDTO {
     private Long id;
     private String email;
     private String role;

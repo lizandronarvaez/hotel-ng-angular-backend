@@ -1,10 +1,11 @@
 package com.hotel_ng.app.service.impl;
 
-import com.hotel_ng.app.dto.LoginUserDto;
-import com.hotel_ng.app.dto.RegisterUserDto;
-import com.hotel_ng.app.dto.UserDto;
-import com.hotel_ng.app.entity.Client;
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.dto.request.RequestFormQuestionDTO;
+import com.hotel_ng.app.dto.request.RequestLoginUserDTO;
+import com.hotel_ng.app.dto.request.RequestRegisterUserDTO;
+import com.hotel_ng.app.dto.UserDTO;
+import com.hotel_ng.app.entity.User;
+import com.hotel_ng.app.enums.Role;
 import com.hotel_ng.app.mappers.BookingMapper;
 import com.hotel_ng.app.mappers.UserMapper;
 import com.hotel_ng.app.repository.UserRepository;
@@ -51,54 +52,62 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    private Client CLIENT_PREPARED;
-    private UserDto CLIENT_PREPARED_DTO;
+    private User USER_PREPARED;
+    private UserDTO USER_PREPARED_DTO;
 
-    private RegisterUserDto REGISTER_USER_PREPARED;
-    private LoginUserDto LOGIN_USER_PREPARED;
+    private RequestRegisterUserDTO REGISTER_USER_PREPARED;
+    private RequestLoginUserDTO LOGIN_USER_PREPARED;
+    private RequestFormQuestionDTO REQUEST_FORM_QUESTION_PREPARED;
 
-    private String MESSAGE_SUCCESS_REGISTER;
-    private String MESSAGE_CONFLICT_REGISTER;
+    static String MESSAGE_SUCCESS_REGISTER;
+    static String MESSAGE_CONFLICT_REGISTER;
 
-    private String MESSAGE_SUCCESS_LOGIN;
-    private String MESSAGE_ERROR_LOGIN;
+    static String MESSAGE_SUCCESS_LOGIN;
+    static String MESSAGE_ERROR_LOGIN;
 
     @BeforeEach
     void setUp() {
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        CLIENT_PREPARED = Client.builder()
+        USER_PREPARED = User.builder()
                 .id(1L)
                 .fullName("cliente prueba")
                 .email("cliente@cliente.com")
                 .numberPhone("618429871")
-                .role(UserRole.ROLE_USER)
+                .role(Role.ROLE_USER)
                 .password(passwordEncoder.encode("password"))
                 .build();
 
-        CLIENT_PREPARED_DTO = UserDto.builder()
+        USER_PREPARED_DTO = UserDTO.builder()
                 .id(1L)
                 .fullName("cliente prueba")
                 .email("cliente@cliente.com")
-                .numberPhone("618429871")
-                .role(UserRole.ROLE_USER.name())
+                .numberPhone("12345678")
+                .role(Role.ROLE_USER.name())
                 .bookings(null)
                 .build();
 
-        REGISTER_USER_PREPARED = RegisterUserDto.builder()
+        REGISTER_USER_PREPARED = RequestRegisterUserDTO.builder()
                 .fullName("cliente prueba")
                 .email("cliente@cliente.com")
                 .numberPhone("618429871")
                 .password(passwordEncoder.encode("password"))
                 .build();
 
-        LOGIN_USER_PREPARED = LoginUserDto.builder()
+        LOGIN_USER_PREPARED = RequestLoginUserDTO.builder()
                 .email("cliente@cliente.com")
                 .password("password")
                 .build();
 
+        REQUEST_FORM_QUESTION_PREPARED = RequestFormQuestionDTO.builder()
+                .email("cliente@cliente.com")
+                .fullName("Nombre de cliente")
+                .numberPhone("12345678")
+                .message("Esto es un mensaje de prueba")
+                .build();
+
         MESSAGE_SUCCESS_REGISTER = "Usuario registrado con éxito";
-        MESSAGE_CONFLICT_REGISTER = "Error al registrar usuario: " + CLIENT_PREPARED_DTO.getEmail() + " ya existe";
+        MESSAGE_CONFLICT_REGISTER = "Error al registrar usuario: " + USER_PREPARED_DTO.getEmail() + " ya existe";
 
         MESSAGE_SUCCESS_LOGIN = "Usuario logueado con éxito";
         MESSAGE_ERROR_LOGIN = "Error al iniciar sesión: Usuario no encontrado";
@@ -106,52 +115,52 @@ class UserServiceImplTest {
 
 
     @Nested
-    class RegisterClient {
+    class RegisterUser {
         @Test
-        void testRegisterClientSuccess() {
-            when(userRepository.existsByEmail(CLIENT_PREPARED_DTO.getEmail())).thenReturn(false);
-            when(userRepository.save(any(Client.class))).thenReturn(CLIENT_PREPARED);
-            when(userMapper.mapUserEntityToUserDto(any(Client.class)
-            )).thenReturn(CLIENT_PREPARED_DTO);
+        void testRegisterUserSuccess() {
+            when(userRepository.existsByEmail(USER_PREPARED_DTO.getEmail())).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenReturn(USER_PREPARED);
+            when(userMapper.mapUserEntityToUserDto(any(User.class)
+            )).thenReturn(USER_PREPARED_DTO);
 
             userService.register(REGISTER_USER_PREPARED);
 
-            verify(userRepository).save(any(Client.class));
-            verify(userRepository, times(1)).save(any(Client.class));
+            verify(userRepository).save(any(User.class));
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
-        void testRegisterClientError() {
+        void testRegisterUserError() {
 
-            when(userRepository.existsByEmail(CLIENT_PREPARED_DTO.getEmail())).thenReturn(true);
+            when(userRepository.existsByEmail(USER_PREPARED_DTO.getEmail())).thenReturn(true);
 
             userService.register(REGISTER_USER_PREPARED);
 
-            verify(userRepository, times(0)).save(any(Client.class));
+            verify(userRepository, times(0)).save(any(User.class));
         }
     }
 
 
     @Nested
-    class LoginClient {
+    class LoginUser {
 
         @Test
         void testLoginUserSuccess() {
-            when(userRepository.findByEmail(LOGIN_USER_PREPARED.getEmail())).thenReturn(Optional.of(CLIENT_PREPARED));
+            when(userRepository.findByEmail(LOGIN_USER_PREPARED.getEmail())).thenReturn(Optional.of(USER_PREPARED));
             when(authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             LOGIN_USER_PREPARED.getEmail(),
                             LOGIN_USER_PREPARED.getPassword())))
                     .thenReturn(null);
             when(jwtUtils.generateToken(any(UserDetails.class))).thenReturn("TOKEN-GENERADO");
-            when(userMapper.mapUserEntityToUserDto(any(Client.class))).thenReturn(CLIENT_PREPARED_DTO);
+            when(userMapper.mapUserEntityToUserDto(any(User.class))).thenReturn(USER_PREPARED_DTO);
 
             userService.login(LOGIN_USER_PREPARED);
 
             verify(userRepository, times(1)).findByEmail(anyString());
             verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(jwtUtils, times(1)).generateToken(any(UserDetails.class));
-            verify(userMapper, times(1)).mapUserEntityToUserDto(any(Client.class));
+            verify(userMapper, times(1)).mapUserEntityToUserDto(any(User.class));
         }
 
         @Test
@@ -168,8 +177,8 @@ class UserServiceImplTest {
 
     @Test
     void testGetAllUsers() {
-        List<Client> listUsers = List.of(CLIENT_PREPARED);
-        List<UserDto> listUsersDto = List.of(CLIENT_PREPARED_DTO);
+        List<User> listUsers = List.of(USER_PREPARED);
+        List<UserDTO> listUsersDto = List.of(USER_PREPARED_DTO);
 
         when(userRepository.findAll()).thenReturn(listUsers);
         when(userMapper.mapUserListEntityToUserDtoList(listUsers)).thenReturn(listUsersDto);
@@ -183,26 +192,26 @@ class UserServiceImplTest {
     @Test
     void testGetUserBookingHistory() {
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
-        when(userMapper.mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), any(BookingMapper.class))).thenReturn(CLIENT_PREPARED_DTO);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_PREPARED));
+        when(userMapper.mapUserEntityToUserDtoWithBookingAndRoom(any(User.class), any(BookingMapper.class))).thenReturn(USER_PREPARED_DTO);
 
-        userService.getUserBookingHistory(String.valueOf(CLIENT_PREPARED.getId()));
+        userService.getUserBookingHistory(String.valueOf(USER_PREPARED.getId()));
 
         verify(userRepository, times(1)).findById(anyLong());
-        verify(userMapper, times(1)).mapUserEntityToUserDtoWithBookingAndRoom(any(Client.class), isNull());
+        verify(userMapper, times(1)).mapUserEntityToUserDtoWithBookingAndRoom(any(User.class), isNull());
     }
 
     @Nested
     class GetUser {
         @Test
         void testGetUserById_Success() {
-            when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
-            when(userMapper.mapUserEntityToUserDto(any(Client.class))).thenReturn(CLIENT_PREPARED_DTO);
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_PREPARED));
+            when(userMapper.mapUserEntityToUserDto(any(User.class))).thenReturn(USER_PREPARED_DTO);
 
-            userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.getUserById(String.valueOf(USER_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
-            verify(userMapper, times(1)).mapUserEntityToUserDto(any(Client.class));
+            verify(userMapper, times(1)).mapUserEntityToUserDto(any(User.class));
 
         }
 
@@ -210,10 +219,10 @@ class UserServiceImplTest {
         void testGetUserById_Error() {
             when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            userService.getUserById(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.getUserById(String.valueOf(USER_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
-            verify(userMapper, times(0)).mapUserEntityToUserDto(any(Client.class));
+            verify(userMapper, times(0)).mapUserEntityToUserDto(any(User.class));
         }
     }
 
@@ -221,9 +230,9 @@ class UserServiceImplTest {
     class DeleteUser {
         @Test
         void testDeleteUserById_Success() {
-            when(userRepository.findById(anyLong())).thenReturn(Optional.of(CLIENT_PREPARED));
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER_PREPARED));
 
-            userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.deleteUser(String.valueOf(USER_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userRepository, times(1)).deleteById(anyLong());
@@ -233,7 +242,7 @@ class UserServiceImplTest {
         void testDeleteUserById_Error() {
             when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            userService.deleteUser(String.valueOf(CLIENT_PREPARED.getId()));
+            userService.deleteUser(String.valueOf(USER_PREPARED.getId()));
 
             verify(userRepository, times(1)).findById(anyLong());
             verify(userRepository, times(0)).deleteById(anyLong());
@@ -242,10 +251,10 @@ class UserServiceImplTest {
 
     @Test
     void testFormUserQuestion() {
-        doNothing().when(emailService).sendEmail(CLIENT_PREPARED_DTO);
+        doNothing().when(emailService).sendEmail(REQUEST_FORM_QUESTION_PREPARED);
 
-        userService.formUserQuestion(CLIENT_PREPARED_DTO);
+        userService.formUserQuestion(REQUEST_FORM_QUESTION_PREPARED);
 
-        verify(emailService, atLeastOnce()).sendEmail(CLIENT_PREPARED_DTO);
+        verify(emailService, atLeastOnce()).sendEmail(REQUEST_FORM_QUESTION_PREPARED);
     }
 }

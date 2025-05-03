@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.hotel_ng.app.dto.AdminDto;
-import com.hotel_ng.app.dto.AdminLoginDto;
-import com.hotel_ng.app.dto.ResponseDto;
+import com.hotel_ng.app.dto.AdminDTO;
+import com.hotel_ng.app.dto.request.RequestAdminDTO;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.entity.Admin;
-import com.hotel_ng.app.enums.UserRole;
+import com.hotel_ng.app.enums.Role;
 import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.repository.AdminRepository;
 import com.hotel_ng.app.security.utils.JwtUtils;
@@ -32,74 +32,75 @@ public class AdminServiceImpl implements AdminService {
     private String CODE_AUTHORIZATION;
 
     @Override
-    public ResponseDto register(AdminLoginDto loginUserDto) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO register(RequestAdminDTO requestAdminDTO) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
 
-            if (adminRepository.existsByEmail(loginUserDto.getEmail())) {
+            if (adminRepository.existsByEmail(requestAdminDTO.getEmail())) {
                 throw new OurException("Hubo un error al realizar la operación");
             }
-            if (!loginUserDto.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
+            if (!requestAdminDTO.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
                 throw new OurException("El código no es válido");
             }
 
             Admin admin = Admin.builder()
-                    .email(loginUserDto.getEmail())
-                    .password(passwordEncoder.encode(loginUserDto.getPassword()))
-                    .role(UserRole.ROLE_ADMIN)
+                    .email(requestAdminDTO.getEmail())
+                    .password(passwordEncoder.encode(requestAdminDTO.getPassword()))
+                    .role(Role.ROLE_ADMIN)
                     .build();
 
             Admin adminSaved = adminRepository.save(admin);
-            AdminDto adminDto =adminMapper.mapAdminEntityToAdminDto(adminSaved);
+            AdminDTO adminDTO =adminMapper.mapAdminEntityToAdminDto(adminSaved);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Cuenta administrador creada correctamente");
-            responseDto.setAdmin(adminDto);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Cuenta administrador creada correctamente");
+            responseDTO.setAdmin(adminDTO);
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error en la operación: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error en la operación: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto login(AdminLoginDto loginUserDto) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO login(RequestAdminDTO requestAdminDTO) {
+        ResponseDTO responseDTO = new ResponseDTO();
 
         try {
-            var admin = adminRepository.findByEmail(loginUserDto.getEmail())
+            var admin = adminRepository.findByEmail(requestAdminDTO.getEmail())
                     .orElseThrow(() -> new OurException("Usuario no encontrado"));
 
-            if (!loginUserDto.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
+            if (!requestAdminDTO.getCodeAuthorization().equals(CODE_AUTHORIZATION)) {
                 throw new OurException("El código no es válido");
             }
-            if (!passwordEncoder.matches(loginUserDto.getPassword(), admin.getPassword())) {
+
+            if (!passwordEncoder.matches(requestAdminDTO.getPassword(), admin.getPassword())) {
                 throw new OurException("Email o password incorrecto");
             }
 
             var token = jwtUtils.generateToken(admin);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Haz accedido como administrador");
-            responseDto.setAdmin(adminMapper.mapAdminEntityToAdminDto(admin));
-            responseDto.setToken(token);
-            responseDto.setRole(admin.getRole().name());
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Haz accedido como administrador");
+            responseDTO.setAdmin(adminMapper.mapAdminEntityToAdminDto(admin));
+            responseDTO.setToken(token);
+            responseDTO.setRole(admin.getRole().name());
 
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage("Error al iniciar sesión: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage("Error al iniciar sesión: " + e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Error realizar el login: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Error realizar el login: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
 }

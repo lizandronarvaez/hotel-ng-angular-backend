@@ -7,26 +7,26 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.hotel_ng.app.dto.ResponseDto;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.enums.RoomType;
 
 public interface RoomService {
-    ResponseDto addNewRoom(MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice, String description,
-            String roomMaxOfGuest);
+    ResponseDTO addNewRoom(MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice, String description,
+                           String roomMaxOfGuest);
 
     List<String> getAllRoomTypes();
 
-    ResponseDto getAllRooms(Pageable pageable);
+    ResponseDTO getAllRooms(Pageable pageable);
 
-    ResponseDto deleteRoom(Long roomId);
+    ResponseDTO deleteRoom(Long roomId);
 
-    ResponseDto updateRoom(Long roomId, MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice,
-            String description,
-            String roomMaxOfGuest);
+    ResponseDTO updateRoom(Long roomId, MultipartFile roomImageUrl, RoomType roomType, BigDecimal roomPrice,
+                           String description,
+                           String roomMaxOfGuest);
 
-    ResponseDto getRoomById(Long roomId);
+    ResponseDTO getRoomById(Long roomId);
 
-    ResponseDto getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
+    ResponseDTO getAvailableRoomsByDateAndType(LocalDate checkInDate, LocalDate checkOutDate, RoomType roomType);
 
-    ResponseDto getAvailableRooms();
+    ResponseDTO getAvailableRooms();
 }

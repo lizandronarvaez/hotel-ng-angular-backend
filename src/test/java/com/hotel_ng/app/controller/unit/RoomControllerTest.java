@@ -1,8 +1,8 @@
 package com.hotel_ng.app.controller.unit;
 
 import com.hotel_ng.app.controller.RoomController;
-import com.hotel_ng.app.dto.ResponseDto;
-import com.hotel_ng.app.dto.RoomDto;
+import com.hotel_ng.app.dto.response.ResponseDTO;
+import com.hotel_ng.app.dto.RoomDTO;
 import com.hotel_ng.app.enums.RoomType;
 import com.hotel_ng.app.exception.OurException;
 import com.hotel_ng.app.service.impl.RoomServiceImpl;
@@ -36,38 +36,17 @@ class RoomControllerTest {
 
     @InjectMocks
     private RoomController roomController;
-    final static String MESSAGE_SUCCESS = "Operación exitosa";
-    final static String FIELD_EMPTY = "Por favor los campos son obligatorios";
+
+    static String MESSAGE_SUCCESS = "Operación exitosa";
+    static String FIELD_EMPTY = "Por favor los campos son obligatorios";
 
 
-    final static RoomDto ROOM_DTO_PREPARED_FIELD_NOT_EMPTY = RoomDto
-            .builder()
-            .id(1L)
-            .roomType("FAMILIAR")
-            .roomPrice(new BigDecimal("30.00"))
-            .roomDescription("Es una buena habitación")
-            .roomMaxOfGuest(2)
-            .build();
+    static RoomDTO ROOM_DTO_PREPARED_FIELD_NOT_EMPTY = RoomDTO.builder().id(1L).roomType("FAMILIAR").roomPrice(new BigDecimal("30.00")).roomDescription("Es una buena habitación").roomMaxOfGuest(2).build();
 
-    final static RoomDto ROOM_DTO_PREPARED_FIELD_EMPTY = RoomDto
-            .builder()
-            .roomType(null)
-            .roomPrice(null)
-            .roomDescription(null)
-            .roomMaxOfGuest(null)
-            .roomImageUrl(null)
-            .build();
-    final static ResponseDto RESPONSE_DTO_PREPARED = ResponseDto.builder()
-            .room(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY)
-            .message(MESSAGE_SUCCESS)
-            .statusCode(HttpStatus.OK.value())
-            .build();
+    static RoomDTO ROOM_DTO_PREPARED_FIELD_EMPTY = RoomDTO.builder().roomType(null).roomPrice(null).roomDescription(null).roomMaxOfGuest(null).roomImageUrl(null).build();
+    static ResponseDTO RESPONSE_DTO_PREPARED = ResponseDTO.builder().room(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY).message(MESSAGE_SUCCESS).statusCode(HttpStatus.OK.value()).build();
 
-    final static ResponseDto RESPONSE_DTO_LIST_ROOMS = ResponseDto.builder()
-            .statusCode(HttpStatus.OK.value())
-            .message("Operación exitosa")
-            .roomList(List.of(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY))
-            .build();
+    static ResponseDTO RESPONSE_DTO_LIST_ROOMS = ResponseDTO.builder().statusCode(HttpStatus.OK.value()).message("Operación exitosa").roomList(List.of(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY)).build();
 
     @Test
     void testGetAllRooms() {
@@ -76,12 +55,11 @@ class RoomControllerTest {
         final String expectedSortField = "id";
         final Sort.Direction expectedDirection = Sort.Direction.ASC;
 
-        Pageable sortedPageable = PageRequest.of(expectedPage, expectedSize,
-                Sort.by(expectedDirection, expectedSortField));
+        Pageable sortedPageable = PageRequest.of(expectedPage, expectedSize, Sort.by(expectedDirection, expectedSortField));
 
         given(roomService.getAllRooms(any(Pageable.class))).willReturn(RESPONSE_DTO_LIST_ROOMS);
 
-        ResponseEntity<ResponseDto> response = roomController.getAllRooms(sortedPageable);
+        ResponseEntity<ResponseDTO> response = roomController.getAllRooms(sortedPageable);
 
         verify(roomService, times(1)).getAllRooms(any(Pageable.class));
         verifyNoMoreInteractions(roomService);
@@ -99,13 +77,7 @@ class RoomControllerTest {
         void testCreateRoomFieldNotEmpty() {
             when(roomService.addNewRoom(any(MultipartFile.class), any(RoomType.class), any(BigDecimal.class), anyString(), anyString())).thenReturn(RESPONSE_DTO_PREPARED);
 
-            ResponseEntity<ResponseDto> response = roomController.addNewRoom(
-                    multipartFile,
-                    RoomType.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomType()),
-                    ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomPrice(),
-                    ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomDescription(),
-                    String.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomMaxOfGuest())
-            );
+            ResponseEntity<ResponseDTO> response = roomController.addNewRoom(multipartFile, RoomType.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomType()), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomPrice(), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomDescription(), String.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomMaxOfGuest()));
 
             verify(roomService).addNewRoom(any(MultipartFile.class), any(RoomType.class), any(BigDecimal.class), anyString(), anyString());
             verifyNoMoreInteractions(roomService);
@@ -118,13 +90,7 @@ class RoomControllerTest {
         @Test
         void testCreateRoomFieldEmpty() {
 
-            ResponseEntity<ResponseDto> response = roomController.addNewRoom(
-                    multipartFile,
-                    RoomType.FAMILIAR,
-                    ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomPrice(),
-                    ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomDescription(),
-                    String.valueOf(ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomMaxOfGuest())
-            );
+            ResponseEntity<ResponseDTO> response = roomController.addNewRoom(multipartFile, RoomType.FAMILIAR, ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomPrice(), ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomDescription(), String.valueOf(ROOM_DTO_PREPARED_FIELD_EMPTY.getRoomMaxOfGuest()));
 
             verify(roomService, times(0)).addNewRoom(any(MultipartFile.class), any(RoomType.class), any(BigDecimal.class), anyString(), anyString());
             verifyNoInteractions(roomService);
@@ -143,7 +109,7 @@ class RoomControllerTest {
 
             given(roomService.getRoomById(anyLong())).willReturn(RESPONSE_DTO_PREPARED);
 
-            ResponseEntity<ResponseDto> response = roomController.getRoomById(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getId());
+            ResponseEntity<ResponseDTO> response = roomController.getRoomById(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getId());
             verify(roomService, times(1)).getRoomById(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getId());
             verifyNoMoreInteractions(roomService);
 

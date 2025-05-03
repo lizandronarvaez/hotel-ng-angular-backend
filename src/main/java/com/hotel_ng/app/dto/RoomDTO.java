@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Data
 @Builder
-public class RoomDto {
+public class RoomDTO {
 
     private Long id;
 
@@ -22,5 +22,5 @@ public class RoomDto {
     private String roomDescription;
 
     private List<ServiceRooms> serviceRooms;
-    private List<BookingDto> bookings;
+    private List<BookingDTO> bookings;
 }

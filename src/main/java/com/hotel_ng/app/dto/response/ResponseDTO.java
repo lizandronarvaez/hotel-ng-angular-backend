@@ -1,7 +1,11 @@
-package com.hotel_ng.app.dto;
+package com.hotel_ng.app.dto.response;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hotel_ng.app.dto.AdminDTO;
+import com.hotel_ng.app.dto.BookingDTO;
+import com.hotel_ng.app.dto.RoomDTO;
+import com.hotel_ng.app.dto.UserDTO;
 import lombok.*;
 
 @Builder
@@ -9,23 +13,23 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseDto {
+public class ResponseDTO {
 
     private int statusCode;
     private String message;
 
+    private AdminDTO admin;
+    private UserDTO user;
     private String token;
     private String role;
+
+    private RoomDTO room;
+    private BookingDTO booking;
     private String confirmationCode;
 
-    private AdminDto admin;
-    private UserDto user;
-    private RoomDto room;
-    private BookingDto booking;
-
-    private List<UserDto> userList;
-    private List<RoomDto> roomList;
-    private List<BookingDto> bookingList;
+    private List<UserDTO> userList;
+    private List<RoomDTO> roomList;
+    private List<BookingDTO> bookingList;
     private List<String> errors;
 
     // Campos para paginación

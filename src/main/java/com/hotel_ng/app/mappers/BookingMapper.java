@@ -1,7 +1,7 @@
 package com.hotel_ng.app.mappers;
 
-import com.hotel_ng.app.dto.BookingDto;
-import com.hotel_ng.app.dto.RoomDto;
+import com.hotel_ng.app.dto.BookingDTO;
+import com.hotel_ng.app.dto.RoomDTO;
 import com.hotel_ng.app.entity.Booking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,8 @@ public class BookingMapper {
     private final UserMapper userMapper;
     private final RoomMapper roomMapper;
 
-    public BookingDto mapBookingEntityToBookingDto(Booking booking) {
-        return BookingDto.builder()
+    public BookingDTO mapBookingEntityToBookingDto(Booking booking) {
+        return BookingDTO.builder()
                 .id(booking.getId())
                 .checkInDate(booking.getCheckInDate())
                 .checkOutDate(booking.getCheckOutDate())
@@ -24,8 +24,8 @@ public class BookingMapper {
                 .build();
     }
 
-    public BookingDto mapBookingEntityToBookingDtoWithRoom(Booking booking, boolean mapUser) {
-        BookingDto bookingDto = BookingDto.builder()
+    public BookingDTO mapBookingEntityToBookingDtoWithRoom(Booking booking, boolean mapUser) {
+        BookingDTO bookingDto = BookingDTO.builder()
                 .id(booking.getId())
                 .checkInDate(booking.getCheckInDate())
                 .checkOutDate(booking.getCheckOutDate())
@@ -37,7 +37,7 @@ public class BookingMapper {
             bookingDto.setUserDto(userMapper.mapUserEntityToUserDto(booking.getUser()));
         }
         if (booking.getRoom() != null) {
-            RoomDto roomDto = RoomDto.builder()
+            RoomDTO roomDto = RoomDTO.builder()
                     .id(booking.getRoom().getId())
                     .roomType(booking.getRoom().getRoomType().name())
                     .roomMaxOfGuest(booking.getRoom().getRoomMaxOfGuest())
@@ -50,7 +50,7 @@ public class BookingMapper {
         return bookingDto;
     }
 
-    public  List<BookingDto> mapBookingListEntityToBookingDtoList(List<Booking> bookings) {
+    public  List<BookingDTO> mapBookingListEntityToBookingDtoList(List<Booking> bookings) {
         return bookings.stream()
                 .map(this::mapBookingEntityToBookingDto)
                 .toList();

@@ -1,8 +1,9 @@
 package com.hotel_ng.app.service.interfaces;
 
-import com.hotel_ng.app.dto.*;
+import com.hotel_ng.app.dto.request.RequestAdminDTO;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 
 public interface AdminService {
-    ResponseDto register(AdminLoginDto loginUserDto);
-    ResponseDto login(AdminLoginDto loginUserDto);
+    ResponseDTO register(RequestAdminDTO requestAdminDTO);
+    ResponseDTO login(RequestAdminDTO requestAdminDTO);
 }

@@ -17,9 +17,9 @@ public class AdminDetailsServiceImpl implements AdminDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        String messageUserNotFound = String.format("El usuario %s no existe", username);
+        final String MESSAGE_ERROR_USER = String.format("El usuario %s no existe", username);
         return adminRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(messageUserNotFound));
+                .orElseThrow(() -> new UsernameNotFoundException(MESSAGE_ERROR_USER));
     }
     
 }

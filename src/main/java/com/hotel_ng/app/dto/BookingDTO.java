@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BookingDto {
+public class BookingDTO {
 
     private Long id;
     private LocalDate checkInDate;
@@ -15,6 +15,6 @@ public class BookingDto {
     // private Integer maxOfGuest;
     private String bookingCode;
 
-    private UserDto userDto;
-    private RoomDto roomDto;
+    private UserDTO userDto;
+    private RoomDTO roomDto;
 }

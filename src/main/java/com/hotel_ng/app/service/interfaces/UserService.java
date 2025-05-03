@@ -1,21 +1,24 @@
 package com.hotel_ng.app.service.interfaces;
 
-import com.hotel_ng.app.dto.*;
+import com.hotel_ng.app.dto.request.RequestFormQuestionDTO;
+import com.hotel_ng.app.dto.request.RequestLoginUserDTO;
+import com.hotel_ng.app.dto.request.RequestRegisterUserDTO;
+import com.hotel_ng.app.dto.response.ResponseDTO;
 
 public interface UserService {
-    ResponseDto register(RegisterUserDto loginUserDto);
+    ResponseDTO register(RequestRegisterUserDTO loginUserDto);
 
-    ResponseDto login(LoginUserDto loginUserDto);
+    ResponseDTO login(RequestLoginUserDTO requestLoginUserDTO);
 
-    ResponseDto getAllUsers();
+    ResponseDTO getAllUsers();
 
-    ResponseDto getUserBookingHistory(String userId);
+    ResponseDTO getUserBookingHistory(String userId);
 
-    ResponseDto getUserById(String userId);
+    ResponseDTO getUserById(String userId);
 
-    ResponseDto getUserProfile(String email);
+    ResponseDTO getUserProfile(String email);
 
-    ResponseDto deleteUser(String userId);
+    ResponseDTO deleteUser(String userId);
 
-    ResponseDto formUserQuestion(UserDto userDto);
+    ResponseDTO formUserQuestion(RequestFormQuestionDTO requestFormQuestionDTO);
 }

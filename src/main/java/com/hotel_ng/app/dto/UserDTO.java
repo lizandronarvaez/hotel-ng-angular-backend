@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto {
+public class UserDTO {
 
     private Long id;
     private String email;
@@ -17,5 +17,5 @@ public class UserDto {
     private String message;
 
     @Builder.Default
-    private List<BookingDto> bookings = new ArrayList<>();
+    private List<BookingDTO> bookings = new ArrayList<>();
 }

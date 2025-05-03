@@ -3,6 +3,7 @@ package com.hotel_ng.app.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.mappers.BookingMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
 
     @Override
-    public ResponseDto saveBooking(Long roomId, Long userId, Booking bookingRequest) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO saveBooking(Long roomId, Long userId, Booking bookingRequest) {
+        ResponseDTO responseDto = new ResponseDTO();
 
         try {
             if (bookingRequest.getCheckOutDate().isBefore(bookingRequest.getCheckInDate())) {
@@ -37,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
             }
 
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new OurException("Habitación no encontrada"));
-            Client user = userRepository.findById(userId).orElseThrow(() -> new OurException("Usuario no encontrado"));
+            User user = userRepository.findById(userId).orElseThrow(() -> new OurException("Usuario no encontrado"));
 
             List<Booking> existingBookings = room.getBookings();
             if (!roomIsAvailable(bookingRequest, existingBookings)) {
@@ -73,13 +74,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseDto getBookingByConfirmationCode(String confirmationCode) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getBookingByConfirmationCode(String confirmationCode) {
+        ResponseDTO responseDto = new ResponseDTO();
         try {
             Booking booking = bookingRepository.findByConfirmationCode(confirmationCode)
                     .orElseThrow(() -> new OurException("Número de reserva no válido"));
 
-            BookingDto bookingDto = bookingMapper.mapBookingEntityToBookingDtoWithRoom(booking, true);
+            BookingDTO bookingDto = bookingMapper.mapBookingEntityToBookingDtoWithRoom(booking, true);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
@@ -95,41 +96,41 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponseDto getAllBookings() {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO getAllBookings() {
+        ResponseDTO responseDTO = new ResponseDTO();
         try {
             List<Booking> bookings = bookingRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
-            List<BookingDto> listBookingsDto = bookingMapper.mapBookingListEntityToBookingDtoList(bookings);
+            List<BookingDTO> listBookingsDTO = bookingMapper.mapBookingListEntityToBookingDtoList(bookings);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Operación exitosa");
-            responseDto.setBookingList(listBookingsDto);
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Operación exitosa");
+            responseDTO.setBookingList(listBookingsDTO);
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     @Override
-    public ResponseDto cancelBooking(Long bookingId) {
-        ResponseDto responseDto = new ResponseDto();
+    public ResponseDTO cancelBooking(Long bookingId) {
+        ResponseDTO responseDTO = new ResponseDTO();
         try {
             bookingRepository.findById(bookingId).orElseThrow(() -> new OurException("No se encontró la reserva"));
             bookingRepository.deleteById(bookingId);
 
-            responseDto.setStatusCode(HttpStatus.OK.value());
-            responseDto.setMessage("Operación exitosa");
+            responseDTO.setStatusCode(HttpStatus.OK.value());
+            responseDTO.setMessage("Operación exitosa");
         } catch (OurException e) {
-            responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
-            responseDto.setMessage(e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+            responseDTO.setMessage(e.getMessage());
 
         } catch (Exception e) {
-            responseDto.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            responseDto.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
+            responseDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            responseDTO.setMessage("Hubo un error al realizar la operación: " + e.getMessage());
         }
-        return responseDto;
+        return responseDTO;
     }
 
     private boolean roomIsAvailable(Booking bookingRequest, List<Booking> existingBookings) {
