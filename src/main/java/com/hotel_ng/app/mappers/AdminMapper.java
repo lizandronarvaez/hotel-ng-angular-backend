@@ -10,7 +10,7 @@ public class AdminMapper {
         return AdminDTO.builder()
                 .id(admin.getId())
                 .email(admin.getEmail())
-                .role(admin.getRole().name())
+                .role(admin.getRole())
                 .build();
     }
 
