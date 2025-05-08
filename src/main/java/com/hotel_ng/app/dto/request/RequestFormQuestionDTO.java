@@ -1,25 +1,22 @@
 package com.hotel_ng.app.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Builder
 @Setter
 @Getter
 public class RequestFormQuestionDTO {
 
-    @NotBlank(message = "El email es obligatorio")
+    @NotBlank(message = "Campo obligatorio")
     @Email(message = "Por favor, ingrese un email válido")
     private String email;
 
-    @NotBlank(message = "El teléfono es obligatorio")
+    @NotBlank(message = "Campo obligatorio")
     private String fullName;
 
     private String numberPhone;
 
-    @NotBlank(message = "El teléfono es obligatorio")
+    @NotBlank(message = "Campo obligatorio")
     private String message;
 }
