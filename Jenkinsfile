@@ -12,12 +12,23 @@ pipeline {
                 checkout scm
             }
         }
+        
+        stage('Build') {
 
-        stage('Deploy') {
-            when {
-                branch 'main'
-                expression { currentBuild.resultIsBetterOrEqualTo('UNSTABLE') }
+            steps {
+                echo 'Realizando build de la aplicación...'
             }
+        }
+        
+        stage('Test') {
+
+            steps {
+                echo 'Realizando test de la aplicación...'
+            }
+        } 
+        
+        stage('Deploy') {
+
             steps {
                 echo 'Desplegando aplicación...'
             }
