@@ -19,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 public class EmailServiceImpl implements EmailService {
 
     @Value("${mailSender.username}")
-    static String username;
+    private String username;
 
     private final JavaMailSender javaMailSender;
 
@@ -27,7 +27,6 @@ public class EmailServiceImpl implements EmailService {
     @Async
     public void sendEmail(RequestFormQuestionDTO formQuestionDTO) {
         try {
-
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 

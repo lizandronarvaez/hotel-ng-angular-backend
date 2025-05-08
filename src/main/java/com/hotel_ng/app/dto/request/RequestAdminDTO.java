@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
