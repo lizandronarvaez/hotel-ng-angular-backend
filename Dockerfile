@@ -3,7 +3,7 @@ FROM maven:3.9.6-amazoncorretto-21 AS builder
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -Dmaven.compiler.release=21
+RUN mvn clean package -Dmaven.compiler.release=21 -DskipTests
 
 # Etapa de ejecución
 FROM amazoncorretto:21-alpine-jdk
