@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'jdk-17.0.12'
-    }
-
     environment {
         // Configuración Docker
         DOCKER_IMAGE = 'hotel-ng-backend'
