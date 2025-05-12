@@ -1,15 +1,22 @@
 pipeline {
+
     agent any
 
+    //Declarar herramientas que utilizaremos
     tools {
         maven 'Maven'
         jdk 'jdk-17.0.12'
     }
 
+    //
     stages {
-        stage('Checkout') {
+//         paso
+        stage('Tareas de limpieza') {
             steps {
-                checkout scm
+//                 Clonar el repositorio
+                git 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git'
+//                 ejecutar la tarea de limpieza
+                sh 'mvn clean'
             }
         }
         
