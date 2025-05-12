@@ -1,46 +1,38 @@
 pipeline {
-
     agent any
 
-    //Declarar herramientas que utilizaremos
-    tools {
-        maven 'Maven'
-        jdk 'jdk-17.0.12'
+  environment {
+        APP_PORT = 3000
     }
 
-    //
     stages {
-//         paso
-        stage('Tareas de limpieza') {
+        stage('Clonar repositorio') {
             steps {
-//                 Clonar el repositorio
-                git 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git'
-//                 ejecutar la tarea de limpieza
-                sh 'mvn clean'
+                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git',
+                     branch: 'main'
             }
         }
-        
-        stage('Build') {
 
+        stage('Construir imagen con docker') {
             steps {
-                echo 'Realizando build de la aplicación...'
+                agent { docker 'amazoncorretto:21-alpine-jdk'}
+
             }
         }
-        
-        stage('Test') {
 
+        stage('Desplegar contenedor') {
             steps {
-                echo 'Realizando test de la aplicación...'
-            }
-        } 
-        
-        stage('Deploy') {
-
-            steps {
-                echo 'Desplegando aplicación...'
+                echo 'Desplegando contenedor'
             }
         }
     }
 
-
+    post {
+        success {
+            echo "✅ Aplicación desplegada en http://localhost:${APP_PORT}"
+        }
+        failure {
+            echo '❌ Error en el pipeline. Consulta los logs.'
+        }
+    }
 }
