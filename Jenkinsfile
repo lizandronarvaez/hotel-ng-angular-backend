@@ -1,35 +1,28 @@
 pipeline {
     agent any
 
-    environment {
-        APP_PORT = '3000'
+  environment {
+        APP_PORT = 3000
     }
 
     stages {
         stage('Clonar repositorio') {
             steps {
-                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git', branch: 'main'
+                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git',
+                     branch: 'main'
             }
         }
 
-        stage('Construir imagen con Docker') {
+        stage('Construir imagen con docker') {
             steps {
-                script {
-                    echo "🛠️ Construyendo imagen Docker"
+                agent { docker 'amazoncorretto:21-alpine-jdk'}
 
-                    sh 'docker build -t hotel-ng-backend .'
-                }
             }
         }
 
         stage('Desplegar contenedor') {
             steps {
-                script {
-                    echo "🚀 Desplegando contenedor Docker"
-
-                    sh 'docker rm -f hotel-ng-backend || true'
-                    sh "docker run -d --name hotel-ng-backend -p ${APP_PORT}:${APP_PORT} hotel-ng-backend"
-                }
+                echo 'Desplegando contenedor'
             }
         }
     }
