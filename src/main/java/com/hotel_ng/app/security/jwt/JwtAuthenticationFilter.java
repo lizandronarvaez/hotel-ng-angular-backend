@@ -59,8 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Validar el token
         if (token == null) {
-            sendUnauthorizedResponseWithMessage(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "No se encontró un token en la cabecera Authorization");
+            response.sendRedirect("/");
             return;
         }
         if (!JwtUtils.isValidJwtFormat(token)) {
