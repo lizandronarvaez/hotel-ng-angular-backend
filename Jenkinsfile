@@ -1,46 +1,62 @@
 pipeline {
-
     agent any
 
-    //Declarar herramientas que utilizaremos
     tools {
         maven 'Maven'
         jdk 'jdk-17.0.12'
     }
 
-    //
+    environment {
+        // Configuración Docker
+        DOCKER_IMAGE = 'hotel-ng-backend'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        APP_PORT = 3000
+    }
+
     stages {
-//         paso
-        stage('Tareas de limpieza') {
+        stage('Clonar el repositorio') {
             steps {
-//                 Clonar el repositorio
-                git 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git'
-//                 ejecutar la tarea de limpieza
-                sh 'mvn clean'
+                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git', branch: 'main'
             }
         }
-        
-        stage('Build') {
 
+
+        stage('Dockerizar la imagen') {
             steps {
-                echo 'Realizando build de la aplicación...'
+                script {
+                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                }
             }
         }
-        
-        stage('Test') {
 
+        stage('Ejecutar la imagen') {
             steps {
-                echo 'Realizando test de la aplicación...'
-            }
-        } 
-        
-        stage('Deploy') {
+                script {
+                    sh "docker stop ${DOCKER_IMAGE} || true"
+                    sh "docker rm ${DOCKER_IMAGE} || true"
 
-            steps {
-                echo 'Desplegando aplicación...'
+                    // Ejecutar el contenedor
+                    sh """
+                        docker run -d \
+                        --name ${DOCKER_IMAGE} \
+                        -p ${APP_PORT}:${APP_PORT} \
+                        ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    """
+                }
             }
         }
     }
 
-
+    post {
+        always {
+            echo 'Pipeline completado - Limpieza de recursos'
+            sh "docker system prune -f"
+        }
+        success {
+            echo "✅ Aplicación desplegada en http://localhost:${APP_PORT}"
+        }
+        failure {
+            echo '❌ Error en el pipeline. Consulta los logs.'
+        }
+    }
 }
