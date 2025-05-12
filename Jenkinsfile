@@ -6,36 +6,41 @@ pipeline {
         DOCKER_IMAGE = 'hotel-ng-backend'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         APP_PORT = 3000
+        DOCKER_SOCKET = '/home/narvaez/Escritorio/docker-socket/docker.sock'  // ¡Nueva variable!
     }
 
     stages {
-        stage('Clonar el repositorio') {
+        stage('Clonar repositorio') {
             steps {
-                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git', branch: 'main'
+                git url: 'https://github.com/lizandronarvaez/hotel-ng-angular-backend.git',
+                     branch: 'main'
             }
         }
 
-
-        stage('Dockerizar la imagen') {
+        stage('Construir imagen') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    // Usa el socket personalizado
+                    sh "DOCKER_HOST=unix://${DOCKER_SOCKET} docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
 
-        stage('Ejecutar la imagen') {
+        stage('Desplegar contenedor') {
             steps {
                 script {
-                    sh "docker stop ${DOCKER_IMAGE} || true"
-                    sh "docker rm ${DOCKER_IMAGE} || true"
-
-                    // Ejecutar el contenedor
+                    // Detener y eliminar contenedor previo (si existe)
                     sh """
-                        docker run -d \
-                        --name ${DOCKER_IMAGE} \
-                        -p ${APP_PORT}:${APP_PORT} \
-                        ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        DOCKER_HOST=unix://${DOCKER_SOCKET} docker stop ${DOCKER_IMAGE} || true
+                        DOCKER_HOST=unix://${DOCKER_SOCKET} docker rm ${DOCKER_IMAGE} || true
+                    """
+
+                    // Ejecutar nuevo contenedor
+                    sh """
+                        DOCKER_HOST=unix://${DOCKER_SOCKET} docker run -d \
+                            --name ${DOCKER_IMAGE} \
+                            -p ${APP_PORT}:${APP_PORT} \
+                            ${DOCKER_IMAGE}:${DOCKER_TAG}
                     """
                 }
             }
@@ -44,8 +49,8 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline completado - Limpieza de recursos'
-            sh "docker system prune -f"
+            echo 'Limpieza de recursos'
+            sh "DOCKER_HOST=unix://${DOCKER_SOCKET} docker system prune -f"
         }
         success {
             echo "✅ Aplicación desplegada en http://localhost:${APP_PORT}"
