@@ -1,7 +1,7 @@
 FROM maven:3.9.9-amazoncorretto-21 AS builder
 WORKDIR /app
 COPY pom.xml .
-COPY src ./src
+COPY . .
 RUN mvn clean install -Dmaven.test.skip=true
 
 FROM amazoncorretto:21-alpine-jdk	
