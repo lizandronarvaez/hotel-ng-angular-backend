@@ -41,7 +41,7 @@ class RoomControllerTest {
     static String FIELD_EMPTY = "Por favor los campos son obligatorios";
 
 
-    static RoomDTO ROOM_DTO_PREPARED_FIELD_NOT_EMPTY = RoomDTO.builder().id(1L).roomType("FAMILIAR").roomPrice(new BigDecimal("30.00")).roomDescription("Es una buena habitación").roomMaxOfGuest(2).build();
+    static RoomDTO ROOM_DTO_PREPARED_FIELD_NOT_EMPTY = RoomDTO.builder().id(1L).roomType(RoomType.valueOf("FAMILIAR")).roomPrice(new BigDecimal("30.00")).roomDescription("Es una buena habitación").roomMaxOfGuest(2).build();
 
     static RoomDTO ROOM_DTO_PREPARED_FIELD_EMPTY = RoomDTO.builder().roomType(null).roomPrice(null).roomDescription(null).roomMaxOfGuest(null).roomImageUrl(null).build();
     static ResponseDTO RESPONSE_DTO_PREPARED = ResponseDTO.builder().room(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY).message(MESSAGE_SUCCESS).statusCode(HttpStatus.OK.value()).build();
@@ -77,7 +77,7 @@ class RoomControllerTest {
         void testCreateRoomFieldNotEmpty() {
             when(roomService.addNewRoom(any(MultipartFile.class), any(RoomType.class), any(BigDecimal.class), anyString(), anyString())).thenReturn(RESPONSE_DTO_PREPARED);
 
-            ResponseEntity<ResponseDTO> response = roomController.addNewRoom(multipartFile, RoomType.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomType()), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomPrice(), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomDescription(), String.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomMaxOfGuest()));
+            ResponseEntity<ResponseDTO> response = roomController.addNewRoom(multipartFile, RoomType.valueOf(String.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomType())), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomPrice(), ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomDescription(), String.valueOf(ROOM_DTO_PREPARED_FIELD_NOT_EMPTY.getRoomMaxOfGuest()));
 
             verify(roomService).addNewRoom(any(MultipartFile.class), any(RoomType.class), any(BigDecimal.class), anyString(), anyString());
             verifyNoMoreInteractions(roomService);
