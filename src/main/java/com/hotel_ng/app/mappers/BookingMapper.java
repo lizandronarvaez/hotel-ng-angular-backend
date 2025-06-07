@@ -19,8 +19,22 @@ public class BookingMapper {
                 .checkInDate(booking.getCheckInDate())
                 .checkOutDate(booking.getCheckOutDate())
                 .bookingCode(booking.getConfirmationCode())
+                .totalNights(booking.getTotalNights())
+                .totalPriceNights(booking.getTotalPriceNights())
                 .userDto(userMapper.mapUserEntityToUserDto(booking.getUser()))
                 .roomDto(roomMapper.mapRoomEntityToRoomDto(booking.getRoom()))
+                .build();
+    }
+
+    public Booking mapBookingDtoToBookingEntity(BookingDTO bookingDTO) {
+        return Booking.builder()
+                .checkInDate(bookingDTO.getCheckInDate())
+                .checkOutDate(bookingDTO.getCheckOutDate())
+                .confirmationCode(bookingDTO.getBookingCode())
+                .totalPriceNights(bookingDTO.getTotalPriceNights())
+                .totalNights(bookingDTO.getTotalNights())
+                .user(userMapper.mapUserDtoToUserEntity(bookingDTO.getUserDto()))
+                .room(roomMapper.mapRoomDtoToRoomEntity(bookingDTO.getRoomDto()))
                 .build();
     }
 
@@ -29,8 +43,9 @@ public class BookingMapper {
                 .id(booking.getId())
                 .checkInDate(booking.getCheckInDate())
                 .checkOutDate(booking.getCheckOutDate())
+                .totalNights(booking.getTotalNights())
+                .totalPriceNights(booking.getTotalPriceNights())
                 .bookingCode(booking.getConfirmationCode())
-                // .maxOfGuest(booking.getMaxOfGuest())
                 .userDto(userMapper.mapUserEntityToUserDto(booking.getUser()))
                 .build();
         if (mapUser) {
@@ -39,7 +54,7 @@ public class BookingMapper {
         if (booking.getRoom() != null) {
             RoomDTO roomDto = RoomDTO.builder()
                     .id(booking.getRoom().getId())
-                    .roomType(booking.getRoom().getRoomType().name())
+                    .roomType(booking.getRoom().getRoomType())
                     .roomMaxOfGuest(booking.getRoom().getRoomMaxOfGuest())
                     .roomImageUrl(booking.getRoom().getRoomImageUrl())
                     .roomDescription(booking.getRoom().getRoomDescription())

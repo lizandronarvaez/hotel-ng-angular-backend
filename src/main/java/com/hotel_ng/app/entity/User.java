@@ -2,6 +2,7 @@ package com.hotel_ng.app.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +24,8 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private String fullName;
+    @Column(name = "full_name")
+    private String fullname;
     private String email;
     private String password;
     private String numberPhone;
@@ -67,7 +69,7 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", fullName=" + fullName + ", email=" + email + ", password=" + password
+        return "User [id=" + id + ", fullName=" + fullname + ", email=" + email + ", password=" + password
                 + ", numberPhone=" + numberPhone + ", role=" + role + "]";
     }
 }

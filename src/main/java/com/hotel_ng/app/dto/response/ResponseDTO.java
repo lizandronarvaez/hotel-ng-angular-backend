@@ -26,6 +26,8 @@ public class ResponseDTO {
     private RoomDTO room;
     private BookingDTO booking;
     private String confirmationCode;
+    private String totalNights;
+    private String totalPriceNights;
 
     private List<UserDTO> userList;
     private List<RoomDTO> roomList;

@@ -41,7 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/bookings/get-by-booking-code",
             "/api/v1/swagger-ui",
             "/api/v1/v3/api-docs",
-            "/api/v1/users/form-contact"
+            "/api/v1/users/form-contact",
+            "/api/v1/bookings/new-reservation/book-room"
     );
 
     @Override

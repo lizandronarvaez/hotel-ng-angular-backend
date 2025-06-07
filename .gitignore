@@ -24,3 +24,4 @@ target/
 ### VS Code ###
 .vscode/
 /.mvn/
+variables.env

@@ -1,9 +1,11 @@
 package com.hotel_ng.app.entity;
 
 import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.*;
 
+@ToString
 @Builder
 @Getter
 @Setter
@@ -18,12 +20,10 @@ public class Booking {
     private long id;
 
     private LocalDate checkInDate;
-
     private LocalDate checkOutDate;
-
     private String confirmationCode;
-
-    // private int maxOfGuest;
+    private String totalNights;
+    private String totalPriceNights;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -32,11 +32,4 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
-
-    @Override
-    public String toString() {
-        return "Booking [id=" + id + ", checkInDate=" + checkInDate + ", checkOutDate=" + checkOutDate
-                + ", bookingCode=" + confirmationCode + "]";
-    }
-
 }
