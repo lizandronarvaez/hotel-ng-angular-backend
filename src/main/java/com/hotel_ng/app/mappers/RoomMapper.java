@@ -30,7 +30,7 @@ public class RoomMapper {
     public RoomDTO mapRoomEntityToRoomDto(Room room) {
         return RoomDTO.builder()
                 .id(room.getId())
-                .roomType(room.getRoomType().name().toLowerCase())
+                .roomType(room.getRoomType())
                 .roomPrice(room.getRoomPrice())
                 .roomDescription(room.getRoomDescription())
                 .roomMaxOfGuest(room.getRoomMaxOfGuest())
@@ -42,7 +42,7 @@ public class RoomMapper {
     public RoomDTO mapRoomEntityToRoomDtoWithBooking(Room booking, BookingMapper bookingMapper) {
         RoomDTO roomDto = RoomDTO.builder()
                 .id(booking.getId())
-                .roomType(booking.getRoomType().name())
+                .roomType(booking.getRoomType())
                 .roomMaxOfGuest(booking.getRoomMaxOfGuest())
                 .roomImageUrl(booking.getRoomImageUrl())
                 .roomDescription(booking.getRoomDescription())
@@ -60,5 +60,16 @@ public class RoomMapper {
 
     public List<RoomDTO> mapRoomListEntityToRoomListDTO(List<Room> roomList) {
         return roomList.stream().map(this::mapRoomEntityToRoomDto).collect(Collectors.toList());
+    }
+
+    public Room mapRoomDtoToRoomEntity(RoomDTO roomDto) {
+        return Room.builder()
+                .roomType(roomDto.getRoomType())
+                .roomPrice(roomDto.getRoomPrice())
+                .roomMaxOfGuest(roomDto.getRoomMaxOfGuest())
+                .roomDescription(roomDto.getRoomDescription())
+                .services(roomDto.getServiceRooms())
+                .roomImageUrl(roomDto.getRoomImageUrl())
+                .build();
     }
 }
