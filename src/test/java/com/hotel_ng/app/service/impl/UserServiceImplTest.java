@@ -71,7 +71,7 @@ class UserServiceImplTest {
 
         USER_PREPARED = User.builder()
                 .id(1L)
-                .fullName("cliente prueba")
+                .fullname("cliente prueba")
                 .email("cliente@cliente.com")
                 .numberPhone("618429871")
                 .role(Role.ROLE_USER)
@@ -80,7 +80,7 @@ class UserServiceImplTest {
 
         USER_PREPARED_DTO = UserDTO.builder()
                 .id(1L)
-                .fullName("cliente prueba")
+                .fullname("cliente prueba")
                 .email("cliente@cliente.com")
                 .numberPhone("12345678")
                 .role(Role.ROLE_USER.name())
@@ -88,7 +88,7 @@ class UserServiceImplTest {
                 .build();
 
         REGISTER_USER_PREPARED = RequestRegisterUserDTO.builder()
-                .fullName("cliente prueba")
+                .fullname("cliente prueba")
                 .email("cliente@cliente.com")
                 .numberPhone("618429871")
                 .password(passwordEncoder.encode("password"))
