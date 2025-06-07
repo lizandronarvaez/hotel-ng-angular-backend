@@ -1,5 +1,6 @@
 package com.hotel_ng.app.service.interfaces;
 
+import com.hotel_ng.app.dto.request.RequestBookingDTO;
 import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.entity.Booking;
 
@@ -11,5 +12,5 @@ public interface BookingService {
 
     ResponseDTO getBookingByConfirmationCode(String confirmationCode);
 
-    ResponseDTO saveBooking(Long roomId, Long userId, Booking bookingRequest);
+    ResponseDTO saveBooking(Long roomId, RequestBookingDTO bookingRequest);
 }

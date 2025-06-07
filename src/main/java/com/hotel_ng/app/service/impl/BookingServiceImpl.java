@@ -3,10 +3,15 @@ package com.hotel_ng.app.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel_ng.app.dto.request.RequestBookingDTO;
 import com.hotel_ng.app.dto.response.ResponseDTO;
-import com.hotel_ng.app.mappers.BookingMapper;
+import com.hotel_ng.app.enums.Role;
+import com.hotel_ng.app.mappers.*;
+
+import org.slf4j.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.hotel_ng.app.dto.*;
 import com.hotel_ng.app.entity.*;
@@ -20,43 +25,51 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class BookingServiceImpl implements BookingService {
 
+    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
 
     @Override
-    public ResponseDTO saveBooking(Long roomId, Long userId, Booking bookingRequest) {
+    public ResponseDTO saveBooking(Long roomId, RequestBookingDTO bookingRequest) {
         ResponseDTO responseDto = new ResponseDTO();
-
         try {
-            if (bookingRequest.getCheckOutDate().isBefore(bookingRequest.getCheckInDate())) {
-                throw new OurException("Debes realizar el check in antes del checkout");
+            LocalDate checkInDate = bookingRequest.getBooking().getCheckInDate();
+            LocalDate checkOutDate = bookingRequest.getBooking().getCheckOutDate();
+
+            if (checkOutDate.isBefore(checkInDate)) {
+                throw new OurException("Debes realizar el check-in antes del check-out.");
             }
-            if (bookingRequest.getCheckInDate().isBefore(LocalDate.now())) {
-                throw new OurException("La fecha de check-in no puede ser anterior a hoy");
+
+            if (checkInDate.isBefore(LocalDate.now())) {
+                throw new OurException("La fecha de check-in no puede ser anterior a hoy.");
             }
 
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new OurException("Habitación no encontrada"));
-            User user = userRepository.findById(userId).orElseThrow(() -> new OurException("Usuario no encontrado"));
+            User user = createUserIfNotExist(bookingRequest);
 
             List<Booking> existingBookings = room.getBookings();
             if (!roomIsAvailable(bookingRequest, existingBookings)) {
-                throw new OurException("Habitación no disponible");
+                throw new OurException("Habitación no disponible en las fechas programadas");
             }
 
-            bookingRequest.setRoom(room);
-            bookingRequest.setUser(user);
+            Booking booking = new Booking();
+            booking.setCheckInDate(bookingRequest.getBooking().getCheckInDate());
+            booking.setCheckOutDate(bookingRequest.getBooking().getCheckOutDate());
+            booking.setTotalNights(bookingRequest.getBooking().getTotalNights());
+            booking.setTotalPriceNights(bookingRequest.getBooking().getTotalPriceNights());
+            booking.setRoom(room);
+            booking.setUser(user);
+            booking.setConfirmationCode(Utils.generateCodeBooking(10));
 
-            String bookingConfirmationCode = Utils.generateCodeBooking(10);
-            bookingRequest.setConfirmationCode(bookingConfirmationCode);
-            bookingRepository.save(bookingRequest);
+            bookingRepository.save(booking);
 
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
-            responseDto.setConfirmationCode(bookingConfirmationCode);
-
+            responseDto.setConfirmationCode(booking.getConfirmationCode());
         } catch (OurException e) {
+
             if (e.getMessage().contains("no encontrada") || e.getMessage().contains("no encontrado")) {
                 responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
             } else if (e.getMessage().contains("no disponible")) {
@@ -85,6 +98,7 @@ public class BookingServiceImpl implements BookingService {
             responseDto.setStatusCode(HttpStatus.OK.value());
             responseDto.setMessage("Operación exitosa");
             responseDto.setBooking(bookingDto);
+
         } catch (OurException e) {
             responseDto.setStatusCode(HttpStatus.NOT_FOUND.value());
             responseDto.setMessage(e.getMessage());
@@ -133,24 +147,44 @@ public class BookingServiceImpl implements BookingService {
         return responseDTO;
     }
 
-    private boolean roomIsAvailable(Booking bookingRequest, List<Booking> existingBookings) {
+    private boolean roomIsAvailable(RequestBookingDTO bookingRequest, List<Booking> existingBookings) {
+        if (bookingRequest == null || bookingRequest.getBooking() == null ||
+                bookingRequest.getBooking().getCheckInDate() == null ||
+                bookingRequest.getBooking().getCheckOutDate() == null) {
+            return false;
+        }
+        LocalDate newCheckIn = bookingRequest.getBooking().getCheckInDate();
+        LocalDate newCheckOut = bookingRequest.getBooking().getCheckOutDate();
+
+        if (newCheckIn.isAfter(newCheckOut)) {
+            return false;
+        }
+
         return existingBookings.stream()
+                .filter(existingBooking -> existingBooking != null &&
+                        existingBooking.getCheckInDate() != null &&
+                        existingBooking.getCheckOutDate() != null)
+                .noneMatch(existingBooking -> {
+                    LocalDate existingCheckIn = existingBooking.getCheckInDate();
+                    LocalDate existingCheckOut = existingBooking.getCheckOutDate();
 
-                .noneMatch(existingBooking -> bookingRequest.getCheckInDate().equals(existingBooking.getCheckInDate())
-                        || bookingRequest.getCheckOutDate().isBefore(existingBooking.getCheckOutDate())
-                        || (bookingRequest.getCheckInDate().isAfter(existingBooking.getCheckInDate())
-                                && bookingRequest.getCheckInDate().isBefore(existingBooking.getCheckOutDate()))
-                        || (bookingRequest.getCheckInDate().isBefore(existingBooking.getCheckInDate())
-
-                                && bookingRequest.getCheckOutDate().equals(existingBooking.getCheckOutDate()))
-                        || (bookingRequest.getCheckInDate().isBefore(existingBooking.getCheckInDate())
-
-                                && bookingRequest.getCheckOutDate().isAfter(existingBooking.getCheckOutDate()))
-
-                        || (bookingRequest.getCheckInDate().equals(existingBooking.getCheckOutDate())
-                                && bookingRequest.getCheckOutDate().equals(existingBooking.getCheckInDate()))
-
-                        || (bookingRequest.getCheckInDate().equals(existingBooking.getCheckOutDate())
-                                && bookingRequest.getCheckOutDate().equals(bookingRequest.getCheckInDate())));
+                    return (newCheckIn.isBefore(existingCheckOut) &&
+                            newCheckOut.isAfter(existingCheckIn));
+                });
     }
+
+
+    private User createUserIfNotExist(RequestBookingDTO requestBooking) {
+        return userRepository.findByEmail(requestBooking.getClient().getEmail()).orElseGet(() -> {
+            User newUser = User.builder()
+                    .fullname(requestBooking.getClient().getFullname())
+                    .email(requestBooking.getClient().getEmail())
+                    .password(requestBooking.getClient().getNumberPhone())
+                    .numberPhone(requestBooking.getClient().getNumberPhone())
+                    .role(Role.ROLE_USER)
+                    .build();
+            return userRepository.save(newUser);
+        });
+    }
+
 }
