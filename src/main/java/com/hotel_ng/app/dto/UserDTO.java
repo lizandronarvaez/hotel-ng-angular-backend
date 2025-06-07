@@ -11,11 +11,10 @@ public class UserDTO {
 
     private Long id;
     private String email;
-    private String fullName;
+    private String fullname;
     private String numberPhone;
     private String role;
     private String message;
 
-    @Builder.Default
-    private List<BookingDTO> bookings = new ArrayList<>();
+    private List<BookingDTO> bookings;
 }

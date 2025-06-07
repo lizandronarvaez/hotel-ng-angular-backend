@@ -9,7 +9,7 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RequestRegisterUserDTO {
     @NotBlank(message = "El nombre es obligatorio")
-    private String fullName;
+    private String fullname;
 
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "Por favor, ingrese un email válido")
