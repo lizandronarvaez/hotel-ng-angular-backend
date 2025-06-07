@@ -5,10 +5,7 @@ import com.hotel_ng.app.service.interfaces.BookingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.hotel_ng.app.dto.response.ResponseDTO;
-import com.hotel_ng.app.entity.Booking;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -18,7 +15,6 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    //    todo: realizar cambio en este endpoint para realizar reservas de clientes
     @Tag(name = "Usuarios")
     @PostMapping("/new-reservation/book-room/{roomId}")
     public ResponseEntity<ResponseDTO> bookRoom(

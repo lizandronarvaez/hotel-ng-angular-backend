@@ -8,7 +8,7 @@ import com.hotel_ng.app.dto.response.ResponseDTO;
 import com.hotel_ng.app.enums.Role;
 import com.hotel_ng.app.mappers.*;
 
-import org.slf4j.*;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +25,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class BookingServiceImpl implements BookingService {
 
-    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseDTO saveBooking(Long roomId, RequestBookingDTO bookingRequest) {
@@ -179,7 +179,7 @@ public class BookingServiceImpl implements BookingService {
             User newUser = User.builder()
                     .fullname(requestBooking.getClient().getFullname())
                     .email(requestBooking.getClient().getEmail())
-                    .password(requestBooking.getClient().getNumberPhone())
+                    .password(passwordEncoder.encode(requestBooking.getClient().getNumberPhone()))
                     .numberPhone(requestBooking.getClient().getNumberPhone())
                     .role(Role.ROLE_USER)
                     .build();
