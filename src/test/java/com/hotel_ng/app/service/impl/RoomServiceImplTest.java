@@ -66,7 +66,7 @@ class RoomServiceImplTest {
             .builder()
             .id(1L)
             .roomImageUrl(URL_IMAGE_FAKE)
-            .roomType("FAMILIAR")
+            .roomType(RoomType.valueOf("FAMILIAR"))
             .roomPrice(new BigDecimal("30.00"))
             .roomDescription("Es una buena habitación")
             .roomMaxOfGuest(2)
