@@ -61,8 +61,7 @@ public class SecurityConfig {
                         .hasAuthority(Role.ROLE_ADMIN.name())
 
                         // reservas
-                        .requestMatchers(HttpMethod.POST, "/bookings/new-reservation/book-room/**")
-                        .hasAnyAuthority(Role.ROLE_ADMIN.name(), Role.ROLE_USER.name())
+                        .requestMatchers(HttpMethod.POST, "/bookings/new-reservation/book-room/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/bookings/all")
                         .hasAuthority(Role.ROLE_ADMIN.name())
