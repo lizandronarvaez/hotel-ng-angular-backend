@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-         stage('Despliegar contenedor con Docker') {
+         stage('Desplegar contenedor con Docker') {
                     steps {
                         sh '''
                             echo "Eliminando contenedor anterior..."
