@@ -35,7 +35,7 @@ pipeline {
     post {
         success {
             echo "La aplicación estará disponible enseguida, el contenedor está levantandose..."
-            sleep time: 10, unit: 'SECONDS'
+            sleep time: 30, unit: 'SECONDS'
             echo "✅ Se desplegó la aplicación en http://localhost:${APP_PORT}/api/v1/swagger-ui/index.html#/"
         }
         failure {
