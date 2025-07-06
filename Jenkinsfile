@@ -19,25 +19,28 @@ pipeline {
             }
         }
 
- stage('Despliegar contenedor con Docker') {
-            steps {
-                sh '''
-                    echo "Eliminando contenedor anterior..."
-                    docker rm -f hotel-ng-backend || true
+         stage('Despliegar contenedor con Docker') {
+                    steps {
+                        sh '''
+                            echo "Eliminando contenedor anterior..."
+                            docker rm -f hotel-ng-backend || true
 
-                    echo "Desplegando nuevo contenedor"
-                    docker run -d --name hotel-ng-backend -p ${APP_PORT}:8081 --env-file ./variables.env hotel-ng-backend
-                '''
+                            echo "Desplegando nuevo contenedor"
+                            docker run -d --name hotel-ng-backend -p ${APP_PORT}:8081 --env-file ./variables.env hotel-ng-backend
+                        '''
+                    }
+                }
             }
-        }
-    }
 
     post {
         success {
-            echo "Se desplegó la aplicación en http://localhost:${APP_PORT}"
+            echo "La aplicación estará disponible enseguida, el contenedor está levantandose..."
+            sleep time: 10, unit: 'SECONDS'
+            echo "✅ Se desplegó la aplicación en http://localhost:${APP_PORT}/api/v1/swagger-ui/index.html#/"
         }
         failure {
-            echo 'HUbo un error en el pipeline. Consulta los logs.'
+            echo '❌ Hubo un error en el pipeline. Consulta los logs.'
         }
     }
+
 }
